@@ -1,18 +1,26 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import router from "../router";
+import { loginStore } from "../stores";
+
+const newLoginStore = loginStore();
 
 defineProps({
   msg: String,
 })
 
 const count = ref(0)
+
+const test = () => {
+  newLoginStore.setLogin(true);
+}
 </script>
 
 <template>
   <h1>{{ msg }}</h1>
 
   <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
+    <button type="button" @click="test">count is {{ count }}</button>
     <p>
       Edit
       <code>components/HelloWorld.vue</code> to test HMR
