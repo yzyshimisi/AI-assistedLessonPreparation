@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 
 const axiosInstance = axios.create({
-    baseURL:"https://phlin.top/",
+    baseURL:"http://127.0.0.1:4523/m1/5780860-0-default",
     timeout: 10000,
 })
 

@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import router from "../router";
-import { loginStore } from "../stores";
 
-const newLoginStore = loginStore();
 
 defineProps({
   msg: String,
@@ -11,9 +9,6 @@ defineProps({
 
 const count = ref(0)
 
-const test = () => {
-  newLoginStore.setLogin(true);
-}
 </script>
 
 <template>

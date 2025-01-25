@@ -1,14 +1,19 @@
-import { loginStore } from "../stores";
+import { useMainStore } from "../stores";
 import pinia from "../stores/createPinia";
 import { storeToRefs } from "pinia";
 import { createRouter,createWebHistory } from "vue-router";
-import { HelloWorld } from "../components";
+
+import { login, register } from "../views"
 
 const routes = [
     {
-        path: "/Login",
-        component: HelloWorld
+        path: "/login",
+        component: login
     },
+    {
+        path: "/register",
+        component: register
+    }
 ]
 
 const router = createRouter({
@@ -17,16 +22,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to,_,next) => {
-    const loginstore = loginStore(pinia);
+    const loginstore = useMainStore().loginStore(pinia);
     const { loginSession } = storeToRefs(loginstore);
 
-    if(loginSession.value === false){
-        //解决无限重定向的问题
-        if(to.path === "/Login"){
-            next();
-        }else{
-            next("/Login");
-        }
+    if(loginSession.value === false && to.path !== "/login" && to.path !== "/register") {
+        next("/login");
     }else{
         next();
     }
