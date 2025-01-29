@@ -25,7 +25,9 @@
           <li><router-link to="/login">登录</router-link></li>
           <li><router-link to="/register">注册</router-link></li>
         </div>
-        <div v-else>
+        <div v-else class="flex">
+          <li><router-link to="/chat">AI智能对话</router-link></li>
+          <li><router-link to="/user/changePassword">修改密码</router-link></li>
           <li><a @click="loginOut">退出登录</a></li>
         </div>
         <li>
@@ -78,7 +80,8 @@ import router from "./router";
 const loginstore = useMainStore().loginStore();
 
 const loginOut = () => {
+  localStorage.removeItem("token");
   loginstore.setLogin(false);
-  router.push('/Login');
+  router.push('/login');
 }
 </script>

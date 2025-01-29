@@ -1,8 +1,12 @@
 <template>
 <div class="m-[5%] flex justify-center">
-  <div class="card bg-gray-100 w-96 shadow-xl">
+  <div class="card bg-base-100 w-96 shadow-xl">
     <div class="card-body">
-      <h2 class="card-title">邮箱登录</h2>
+      <h1 class="card-title text-4xl justify-center">登录</h1>
+      <div class="mt-4 justify-center">
+        <span class="flex justify-center">已有账号，输入邮箱+密码即可</span>
+        <span class="flex justify-center">没有账号，先去注册</span>
+      </div>
       <label class="input input-bordered flex items-center gap-2 mt-4">
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -30,10 +34,10 @@
         <input v-model="password" type="password" class="grow" placeholder="Password" />
       </label>
       <div class="mt-3">
-        <span class="text-sm cursor-pointer hover:underline">忘记密码？</span>
+        <router-link to="/login/findPassword" class="text-sm cursor-pointer hover:underline">忘记密码？</router-link>
       </div>
-      <div class="mt-4">
-        <button @click="login" class="btn btn-active float-right">登录</button>
+      <div>
+        <button @click="login" class="btn btn-neutral float-right">登录</button>
       </div>
     </div>
   </div>
@@ -57,32 +61,17 @@ const login = () => {
   useRequest(()=>loginAPI({"email":email.value, "password":password.value}),{
     onSuccess(res){
       if(res.code === 200){
-        ElNotification({
-          title: 'Success',
-          message: res.msg,
-          type: 'success',
-        })
+        ElNotification({title: 'Success', message: res.msg, type: 'success',})
         localStorage.setItem("token",res.data.token);
         loginstore.setLogin(true);
         router.push("/");
       }else{
-        ElNotification({
-          title: 'Warning',
-          message: res.msg,
-          type: 'warning',
-        })
+        ElNotification({title: 'Warning', message: res.msg, type: 'warning',})
       }
     },
     onError(err){
-      ElNotification({
-        title: 'Error',
-        message: err,
-        type: 'error',
-      })
+      ElNotification({title: 'Error', message: err, type: 'error',})
     },
-    onFinally(){
-
-    }
   })
 }
 </script>

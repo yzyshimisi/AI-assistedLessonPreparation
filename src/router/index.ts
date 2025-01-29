@@ -3,7 +3,7 @@ import pinia from "../stores/createPinia";
 import { storeToRefs } from "pinia";
 import { createRouter,createWebHistory } from "vue-router";
 
-import { login, register } from "../views"
+import { login, register, findPassword, changePassword, AIChat } from "../views"
 
 const routes = [
     {
@@ -13,6 +13,18 @@ const routes = [
     {
         path: "/register",
         component: register
+    },
+    {
+        path: "/login/findPassword",
+        component: findPassword
+    },
+    {
+        path: "/user/changePassword",
+        component: changePassword
+    },
+    {
+        path: "/chat",
+        component: AIChat
     }
 ]
 
@@ -25,7 +37,7 @@ router.beforeEach((to,_,next) => {
     const loginstore = useMainStore().loginStore(pinia);
     const { loginSession } = storeToRefs(loginstore);
 
-    if(loginSession.value === false && to.path !== "/login" && to.path !== "/register") {
+    if(loginSession.value === false && to.path !== "/login" && to.path !== "/register" && to.path !== "/login/findPassword") {
         next("/login");
     }else{
         next();
