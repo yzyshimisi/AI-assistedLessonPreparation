@@ -1,7 +1,13 @@
-import HelloWorld from "./HelloWorld.vue"
-import chatBox from "./chatBox/index.vue"
+import chatBox from "./chatBox/index.vue";
+import dClickEdit from "./dClickEdit/index.vue";
+import navbar from "./navbar/index.vue";
+import myMenu from "./myMenu/index.vue";
+import lessonPlanDesign from "./lessonPlanDesign/index.vue";
 
 export {
-    HelloWorld,
     chatBox,
+    dClickEdit,
+    navbar,
+    myMenu,
+    lessonPlanDesign,
 }

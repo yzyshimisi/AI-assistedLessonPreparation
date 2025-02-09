@@ -1,5 +1,5 @@
 <template>
-<div class="m-[5%] flex justify-center">
+<div class="flex justify-center items-center h-full">
   <div class="card bg-base-100 w-96 shadow-xl">
     <div class="card-body">
       <div class="flex justify-center">

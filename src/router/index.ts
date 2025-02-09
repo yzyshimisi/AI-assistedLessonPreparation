@@ -3,7 +3,7 @@ import pinia from "../stores/createPinia";
 import { storeToRefs } from "pinia";
 import { createRouter,createWebHistory } from "vue-router";
 
-import { login, register, findPassword, changePassword, AIChat } from "../views"
+import { login, register, findPassword, changePassword, AIChat, home, userInfo, myResources } from "../views"
 
 const routes = [
     {
@@ -25,6 +25,18 @@ const routes = [
     {
         path: "/chat",
         component: AIChat
+    },
+    {
+        path: "/",
+        component: home
+    },
+    {
+        path: "/user/userInfo",
+        component: userInfo
+    },
+    {
+        path: "/myResources",
+        component: myResources,
     }
 ]
 

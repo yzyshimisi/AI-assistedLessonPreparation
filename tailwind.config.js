@@ -4,7 +4,7 @@ export default {
     themes: ["light","dark","cupcake","forest"],
   },
   content: [
-    "./index.html",
+    "./home.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {

@@ -1,9 +1,13 @@
 <template>
-<div class="m-[5%] flex justify-center">
-  <div class="card bg-base-100 w-1/3 shadow-xl">
+<div class="flex justify-center w-full mt-[30px]">
+  <div class="flex flex-col">
+    <el-image src="/login/left.png" class="w-[450px]"/>
+    <div class="divider"></div>
+  </div>
+  <div class="card bg-base-100 w-96 shadow-xl">
     <div class="card-body">
-      <h2 class="card-title">注册新用户</h2>
-      <label class="input input-bordered flex items-center gap-2 mt-4">
+      <h2 class="card-title text-4xl justify-center">注册新用户</h2>
+      <label class="input input-bordered flex items-center gap-2 mt-5">
         用户名
         <input v-model="info.username" type="text" class="grow" placeholder="Daisy" />
       </label>
@@ -33,8 +37,15 @@
         </svg>
         <span>Warning: 两次密码不一致</span>
       </div>
-      <button @click="register" class="btn btn-neutral mt-4">注册</button>
+      <div @click="register" class="relative h-[30px] cursor-pointer mt-4 mb-5">
+        <img src="/btn%20watch.png">
+        <div class="absolute top-[30%] left-[40%] text-base-100">点击注册</div>
+      </div>
     </div>
+  </div>
+  <div class="flex flex-col">
+    <el-image src="/login/right.png" class="w-[450px]" />
+    <div class="divider"></div>
   </div>
 </div>
 </template>

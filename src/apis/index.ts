@@ -7,6 +7,9 @@ import getTopicListAPI from "./Server/chat/getTopicListAPI";
 import deleteTopicAPI from "./Server/chat/deleteTopicAPI";
 import modifyTitleAPI from "./Server/chat/modifyTitleAPI";
 import createTopicAPI from "./Server/chat/createTopicAPI";
+import getChatHistoryAPI from "./Server/chat/getChatHistoryAPI";
+import getUserInfoAPI from "./Server/getUserInfoAPI";
+import changeUserInfoAPI from "./Server/changeUserInfoAPI";
 
 export {
     loginAPI,
@@ -18,4 +21,7 @@ export {
     deleteTopicAPI,
     modifyTitleAPI,
     createTopicAPI,
+    getChatHistoryAPI,
+    getUserInfoAPI,
+    changeUserInfoAPI,
 }

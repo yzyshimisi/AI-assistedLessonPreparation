@@ -1,6 +1,6 @@
 <template>
-<div class="m-[5%] flex justify-center">
-  <div class="card bg-base-100 w-1/3 shadow-xl">
+<div class="flex justify-center w-full bg-base-200">
+  <div class="card bg-base-100 w-[500px] shadow-xl mt-[30px]">
     <div class="card-body">
       <h2 class="card-title">找回密码</h2>
       <label class="form-control w-full">

@@ -1,6 +1,6 @@
 <template>
-<div class="flex h-full">
-  <div class="card bg-base-200 w-80 shadow-xl">
+<div class="flex h-screen w-full bg-base-200 relative">
+  <div class="card bg-base-100 w-[200px] shadow-md">
     <div class="card-body">
       <div>
         <span class="flex float-right">
@@ -8,9 +8,10 @@
           <div class="ml-1 lg:tooltip cursor-pointer hover:bg-base-300" data-tip="新建会话" onclick="addTopic.showModal()"><el-icon :size="23" class="m-1"><Edit /></el-icon></div>
         </span>
       </div>
-      <h2 class="card-title mb-1">会话列表</h2>
+      <h2 class="card-title mb-1 flex justify-center">会话列表</h2>
+      <div style="border-bottom: 2px solid #000000;"></div>
       <div v-for="(value,index) in topicList"
-           class="w-[110%] rounded-lg hover:bg-base-300 hover:cursor-pointer text-lg"
+           class="w-[110%] rounded-lg hover:bg-base-300 hover:cursor-pointer text-base"
            :class="[index === nowTopicInd ? 'bg-base-300' : '']"
            @mouseenter="showChoIcon(index)" @mouseleave="notShowChoIcon(index)"
            @click="chooseTopic(index)"
@@ -23,29 +24,38 @@
             <div class="flex"><el-icon><More /></el-icon></div></div>
         </div>
       </div>
+      <h2 class="card-title mb-1 flex justify-center mt-[100px]">快速功能</h2>
+      <div style="border-bottom: 2px solid #000000;"></div>
+      <div v-for="(value,index) in funcList" @click="showFuncForms(index)">
+        <div class="hover:bg-base-300 hover:cursor-pointer rounded-md">{{value}}</div>
+        <div style="border-bottom: 1px solid #000000;" class="mt-2"></div>
+      </div>
     </div>
   </div>
-  <div class="flex justify-center items-center w-full">
-    <el-empty v-if="nowTopicInd === -1" description="还未选择会话" :image-size="200" />
-    <div v-else="nowTopicInd !== -1">
-        <chatBox></chatBox>
+  <div v-show="nowFuncForms === 0">
+    <lessonPlanDesign></lessonPlanDesign>
+  </div>
+  <div v-if="nowTopicInd === -1 && nowFuncForms === -1" class="flex absolute bottom-0 left-[200px]">
+    <div>
+      <img src="/aichat/aiPerson.png">
     </div>
+    <div class="chat chat-start">
+      <div class="chat-bubble bg-base-100 text-base-content max-w-96">你好！这里是教小帮，请选择会话记录或新建会话</div>
+    </div>
+  </div>
+  <div v-if="nowTopicInd !== -1">
+    <chatBox :key="topicList[nowTopicInd]['id']" :id="topicList[nowTopicInd]['id']"></chatBox>
   </div>
 </div>
 <dialog id="topicInfo" class="modal">
   <div class="modal-box">
     <div class="overflow-x-auto">
-      <table class="table text-lg">
+      <table class="table text-base">
         <tbody>
         <!-- row 1 -->
         <tr>
           <td class="w-2/5">会话名称</td>
-          <td v-if="!isModifyTitle" @dblclick="modifyTitle" class="hover:bg-base-200">
-            <span>{{topicList[dialogInd] ? topicList[dialogInd]['title'] : "数据尚未加载"}}</span>
-          </td>
-          <td v-else class="hover:bg-base-200">
-            <input v-model="topicList[dialogInd].title" @blur="overModifyTitle" @keyup.enter="overModifyTitle" id="titleInput" type="text" placeholder="Type here" class="input-xs w-full max-w-xs text-base" />
-          </td>
+          <td><dClickEdit :data="topicList[dialogInd] ? toRef(topicList[dialogInd],'title') : ref('数据尚未加载')"></dClickEdit></td>
         </tr>
         <!-- row 2 -->
         <tr>
@@ -87,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick, watch } from "vue";
+import { ref, reactive, onMounted, nextTick, watch, toRef } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { getTopicListAPI } from "../../apis/";
 import { ElNotification } from 'element-plus';
@@ -95,19 +105,28 @@ import { useMainStore } from "../../stores";
 import { deleteTopicAPI, modifyTitleAPI, createTopicAPI } from "../../apis";
 import router from "../../router";
 import { useRoute } from "vue-router";
-import { chatBox } from "../../components"
+import { chatBox, dClickEdit, lessonPlanDesign } from "../../components"
 
 const topicList = ref([]);
 const isShowChoIcon = ref<Array<boolean>>([]);
 
 const dialogInd = ref<number>(0);
 
-const isModifyTitle = ref(false);
-
 const newTopicTitle = ref<string>("");
 
 const nowTopicInd = ref<number>(-1);
 const nowRouter = useRoute();
+
+const funcList = reactive([
+    '自定义教案设计',
+    '大单元教学设计',
+    '跨学科设计',
+    '单元作业设计',
+    '说课稿设计',
+    '一键生成PPT',
+    '一键配图',
+])
+const nowFuncForms = ref<number>(-1);
 
 onMounted(()=>{
   useRequest(()=>getTopicListAPI(),{
@@ -117,9 +136,6 @@ onMounted(()=>{
           topicList.value.push(reactive(res['data'][i]));
           isShowChoIcon.value[i] = false;
         }
-        watch(()=>topicList.value[dialogInd.value],c=>{
-          run();
-        },{deep:true})
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
@@ -134,6 +150,7 @@ onMounted(()=>{
         nowTopicInd.value = -1;
       }
       watch(()=>nowRouter.query,(newQuery,oldQuery)=>{
+        nowFuncForms.value = -1;
         if(nowRouter.query['index']){
           nowTopicInd.value = Number(nowRouter.query['index']);
         }else{
@@ -155,18 +172,6 @@ const changeDiaInd = (ind) => {
   dialogInd.value = ind;
 }
 
-const modifyTitle = () => {
-  isModifyTitle.value = true;
-  nextTick(()=>{
-    let titleInput = document.getElementById('titleInput') as HTMLInputElement;
-    titleInput.focus();
-    titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
-  })
-}
-const overModifyTitle = () => {
-  isModifyTitle.value = false;
-}
-
 const { data, run } = useRequest(()=>modifyTitleAPI({
   id: topicList.value[dialogInd.value]['id'],
   new_topic: topicList.value[dialogInd.value]['title'],
@@ -184,6 +189,10 @@ const { data, run } = useRequest(()=>modifyTitleAPI({
     ElNotification({title: 'Error', message: err.toString(), type: 'error',});
   }
 })
+
+watch(()=>topicList.value[dialogInd.value],c=>{
+  run();
+},{deep:true})
 
 const deleteTopic = () => {
   useRequest(()=>deleteTopicAPI({id:topicList.value[dialogInd.value]["id"]}),{
@@ -230,6 +239,10 @@ const createTopic = () => {
 const chooseTopic = (ind) => {
   nowTopicInd.value = ind;
   router.push("/chat?index=".concat(String(nowTopicInd.value)))
+}
+
+const showFuncForms = (ind) => {
+  nowFuncForms.value = ind
 }
 </script>
 

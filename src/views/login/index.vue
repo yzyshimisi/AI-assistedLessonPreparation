@@ -1,11 +1,17 @@
 <template>
-<div class="m-[5%] flex justify-center">
-  <div class="card bg-base-100 w-96 shadow-xl">
+<div class="flex justify-center w-full mt-[35px]">
+  <div class="flex flex-col">
+    <el-image src="/login/left.png" class="w-[450px]"/>
+    <div class="divider"></div>
+  </div>
+  <div class="card bg-base-100 w-96 shadow-xl ">
     <div class="card-body">
       <h1 class="card-title text-4xl justify-center">登录</h1>
       <div class="mt-4 justify-center">
+        <br />
         <span class="flex justify-center">已有账号，输入邮箱+密码即可</span>
         <span class="flex justify-center">没有账号，先去注册</span>
+        <br />
       </div>
       <label class="input input-bordered flex items-center gap-2 mt-4">
         <svg
@@ -34,12 +40,17 @@
         <input v-model="password" type="password" class="grow" placeholder="Password" />
       </label>
       <div class="mt-3">
-        <router-link to="/login/findPassword" class="text-sm cursor-pointer hover:underline">忘记密码？</router-link>
+        <router-link to="/login/findPassword" class="text-sm text-blue-700 cursor-pointer hover:underline">忘记密码？</router-link>
       </div>
-      <div>
-        <button @click="login" class="btn btn-neutral float-right">登录</button>
+      <div @click="login" class="relative h-[30px] cursor-pointer mt-3 mb-5">
+        <img src="/btn%20watch.png">
+        <div class="absolute top-[30%] left-[40%] text-base-100">点击登录</div>
       </div>
     </div>
+  </div>
+  <div class="flex flex-col">
+    <el-image src="/login/right.png" class="w-[450px]" />
+    <div class="divider"></div>
   </div>
 </div>
 </template>
@@ -47,12 +58,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRequest } from "vue-hooks-plus";
-import { loginAPI } from "../../apis"
+import { loginAPI, getUserInfoAPI } from "../../apis"
 import { ElNotification } from 'element-plus'
 import { useMainStore } from "../../stores";
 import router from "../../router";
 
 const loginstore = useMainStore().loginStore();
+const userinfostore = useMainStore().userInfoStore();
 
 const email = ref<string>();
 const password = ref<string>();
@@ -60,18 +72,38 @@ const password = ref<string>();
 const login = () => {
   useRequest(()=>loginAPI({"email":email.value, "password":password.value}),{
     onSuccess(res){
-      if(res.code === 200){
-        ElNotification({title: 'Success', message: res.msg, type: 'success',})
-        localStorage.setItem("token",res.data.token);
+      if(res['code'] === 200){
+        ElNotification({title: 'Success', message: res['msg'], type: 'success',})
+
+        localStorage.setItem("token",res['data']['token']);
         loginstore.setLogin(true);
+
+        getUserInfo();  // 获取用户信息
+
         router.push("/");
       }else{
-        ElNotification({title: 'Warning', message: res.msg, type: 'warning',})
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
     },
     onError(err){
-      ElNotification({title: 'Error', message: err, type: 'error',})
+      ElNotification({title: 'Error', message: err.toString(), type: 'error',})
     },
+  })
+}
+
+const getUserInfo = () => {
+  useRequest(()=>getUserInfoAPI(),{
+    onSuccess(res){
+      if(res['code']===200){
+        userinfostore.setInfo(res['data']);
+        console.log(userinfostore.userInfo);
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    },
+    onError(err){
+      ElNotification({title: 'Error', message: err.toString(), type: 'error',})
+    }
   })
 }
 </script>
