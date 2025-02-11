@@ -7,11 +7,11 @@
     </label>
   </div>
   <div class="flex-none">
-    <ul v-if="!loginstore.loginSession" class="menu menu-horizontal px-1">
+    <ul v-if="!loginstore.loginSession" class="menu menu-horizontal px-1 font-bold">
       <li><router-link to="/login">登录</router-link></li>
       <li><router-link to="/register">注册</router-link></li>
     </ul>
-    <ul v-else class="menu menu-horizontal px-1 flex items-center">
+    <ul v-else class="menu menu-horizontal px-1 flex items-center font-bold">
       <li><router-link to="/chat">AI智能对话</router-link></li>
       <li><router-link to="/myResources">我的资源</router-link></li>
       <li><a>备课素材</a></li>

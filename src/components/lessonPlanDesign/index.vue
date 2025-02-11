@@ -25,10 +25,10 @@
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>教案模板文件</span>
     <el-upload
+        :on-change="templateFileChange"
         class="upload-demo"
         drag
-        action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-        multiple
+        :auto-upload="false"
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
       <div class="el-upload__text flex flex-col gap-2">
@@ -40,6 +40,7 @@
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>教案参考资料（课件/逐字稿/教案）</span>
     <el-upload
+        :on-change="referenceMaterialChange"
         class="upload-demo"
         drag
         action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
@@ -89,6 +90,7 @@ import type { UploadProps, UploadUserFile } from 'element-plus'
 const dialogImageUrl = ref('')  // 预览对话框
 const dialogVisible = ref(false)  // 对话框显示
 
+const templateFile = ref<UploadUserFile>()
 const fileList = ref<UploadUserFile[]>([])
 
 const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
@@ -100,10 +102,19 @@ const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
   dialogVisible.value = true
 }
 
+const templateFileChange = (uploadFile,uploadFiles) => {
+
+}
+
+const referenceMaterialChange = (uploadFile,uploadFiles) => {
+
+}
+
 const createLessonPlans = () => {
   for(let i=0;i<fileList.value.length;i++){
     console.log(fileList.value[i].raw);
   }
+  console.log(templateFile.value)
 }
 </script>
 

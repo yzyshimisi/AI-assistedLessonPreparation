@@ -3,6 +3,7 @@ import dClickEdit from "./dClickEdit/index.vue";
 import navbar from "./navbar/index.vue";
 import myMenu from "./myMenu/index.vue";
 import lessonPlanDesign from "./lessonPlanDesign/index.vue";
+import displayFile from "./displayFile/index.vue";
 
 export {
     chatBox,
@@ -10,4 +11,5 @@ export {
     navbar,
     myMenu,
     lessonPlanDesign,
+    displayFile,
 }

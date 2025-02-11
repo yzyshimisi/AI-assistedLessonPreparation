@@ -24,11 +24,13 @@
             <div class="flex"><el-icon><More /></el-icon></div></div>
         </div>
       </div>
-      <h2 class="card-title mb-1 flex justify-center mt-[100px]">快速功能</h2>
-      <div style="border-bottom: 2px solid #000000;"></div>
-      <div v-for="(value,index) in funcList" @click="showFuncForms(index)">
-        <div class="hover:bg-base-300 hover:cursor-pointer rounded-md">{{value}}</div>
-        <div style="border-bottom: 1px solid #000000;" class="mt-2"></div>
+      <div class="flex flex-col gap-2 absolute bottom-[100px]">
+        <h2 class="card-title flex justify-center mb-1">快速功能</h2>
+        <div style="border-bottom: 2px solid #000000;"></div>
+        <div v-for="(value,index) in funcList" @click="showFuncForms(index)">
+          <div class="hover:bg-base-300 hover:cursor-pointer rounded-md">{{value}}</div>
+          <div style="border-bottom: 1px solid #000000;" class="mt-2"></div>
+        </div>
       </div>
     </div>
   </div>
