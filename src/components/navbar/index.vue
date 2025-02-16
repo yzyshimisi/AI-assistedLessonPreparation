@@ -14,14 +14,14 @@
     <ul v-else class="menu menu-horizontal px-1 flex items-center font-bold">
       <li><router-link to="/chat">AI智能对话</router-link></li>
       <li><router-link to="/myResources">我的资源</router-link></li>
-      <li><a>备课素材</a></li>
+      <li><router-link to="/lessonPreparationMaterials">备课素材</router-link></li>
       <li><a>习题素材</a></li>
-      <li><a>我的班级</a></li>
+      <li><router-link to="/classManagement">我的班级</router-link></li>
       <li><a>教小帮-TeachPal</a></li>
       <div class="dropdown dropdown-end mr-4">
         <div class="avatar" tabindex="0" role="button">
           <div class="w-[40px] rounded-full">
-            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+            <img :src="userinfostore.userInfo.avatar" />
           </div>
         </div>
         <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">

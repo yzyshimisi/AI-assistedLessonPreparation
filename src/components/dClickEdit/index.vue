@@ -4,11 +4,11 @@
       @dblclick="modify"
       class="hover:bg-base-200"
   >
-    <span>{{props.data}}</span>
+    <span>{{data}}</span>
   </div>
   <div v-else class="hover:bg-base-200">
     <input
-      v-model="props.data.value"
+      v-model="data"
       @blur="overModify"
       @keyup.enter="overModify"
       id="textInput"
@@ -23,7 +23,10 @@ import { ref, nextTick } from "vue";
 
 const isModify = ref(false);
 
-const props = defineProps(['data']);
+const props = defineProps(['data','font-size']);
+const varemit = defineEmits(["overModify"])
+
+const data = ref(props.data)
 
 const modify = () => {
   isModify.value = true
@@ -35,6 +38,7 @@ const modify = () => {
 }
 const overModify = () => {
   isModify.value = false
+  varemit('overModify',data.value)
 }
 </script>
 

@@ -14,6 +14,16 @@ import createDirectoryAPI from "./Server/myResources/createDirectoryAPI";
 import getFileListAPI from "./Server/myResources/getFileListAPI";
 import getFileInfoAPI from "./Server/myResources/getFileInfoAPI";
 import modifyFileNameAPI from "./Server/myResources/modifyFileNameAPI";
+import deleteFileAPI from "./Server/myResources/deleteFileAPI";
+import uploadFileAPI from "./Server/myResources/uploadFileAPI";
+import collectFileAPI from "./Server/myResources/collectFileAPI";
+import moveFileAPI from "./Server/myResources/moveFileAPI";
+import searchFileAPI from "./Server/myResources/searchFileAPI";
+import filterFileTypeAPI from "./Server/myResources/filterFileTypeAPI";
+import userUploadAPI from "./Server/userUploadAPI";
+import getRecycleListAPI from "./Server/myResources/getRecycleListAPI";
+import restoreFileAPI from "./Server/myResources/restoreFileAPI";
+import completelyDelAPI from "./Server/myResources/completelyDelAPI";
 
 export {
     loginAPI,
@@ -32,4 +42,14 @@ export {
     getFileListAPI,
     getFileInfoAPI,
     modifyFileNameAPI,
+    deleteFileAPI,
+    uploadFileAPI,
+    collectFileAPI,
+    moveFileAPI,
+    searchFileAPI,
+    filterFileTypeAPI,
+    userUploadAPI,
+    getRecycleListAPI,
+    restoreFileAPI,
+    completelyDelAPI,
 }

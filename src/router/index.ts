@@ -3,7 +3,7 @@ import pinia from "../stores/createPinia";
 import { storeToRefs } from "pinia";
 import { createRouter,createWebHistory } from "vue-router";
 
-import { login, register, findPassword, changePassword, AIChat, home, userInfo, myResources } from "../views"
+import { login, register, findPassword, changePassword, AIChat, home, userInfo, myResources, lessonPreparationMaterials, classManagement } from "../views"
 
 const routes = [
     {
@@ -31,12 +31,20 @@ const routes = [
         component: home
     },
     {
-        path: "/user/userInfo",
+        path: "/userInfo",
         component: userInfo
     },
     {
         path: "/myResources",
         component: myResources,
+    },
+    {
+        path: "/lessonPreparationMaterials",
+        component: lessonPreparationMaterials,
+    },
+    {
+        path: "/classManagement",
+        component: classManagement,
     }
 ]
 

@@ -134,6 +134,7 @@ onMounted(()=>{
   useRequest(()=>getTopicListAPI(),{
     onSuccess(res){
       if(res['code']===200){
+        if(!res['data']) return
         for(let i=0; i<res['data'].length; i++){
           topicList.value.push(reactive(res['data'][i]));
           isShowChoIcon.value[i] = false;

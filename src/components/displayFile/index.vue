@@ -2,25 +2,48 @@
 <div
     @mouseover="showIcon"
     @mouseout="notShowIcon"
-    @click="selectOne"
+    @click="handleClick"
     @dblclick="changeDirectory"
-    class="p-2 hover:bg-base-200 hover:cursor-pointer flex flex-col"
-    :class="props['isSelected'] ? 'bg-base-200' : ''">
+
+    :draggable="props.isRename ? false : true"
+    class="p-2 hover:bg-slate-100 hover:cursor-pointer flex flex-col"
+    :class="props['isSelected'] ? 'bg-slate-100' : ''"
+>
   <div class="flex gap-3">
     <div v-show="!props['isSelected']"><img @click.stop="selectFile" src="/myResources/multiChoice/unselected.png" :class="isShowIcon ? '' : 'invisible'"></div>
     <div v-show="props['isSelected']"><img @click.stop="unselectFile" src="/myResources/multiChoice/selected.png"></div>
-    <img :src="fileIcon[getFileIconInd(props['fileType'])]">
-    <div><img src="/myResources/interactive/star_Stroke.png" :class="isShowIcon || props['isSelected'] ? '' : 'invisible'"></div>
+    <img :src="fileIcon[getFileIconInd(props['fileType'])]" class="size-20">
+    <div :class="isShowIcon || props['isSelected'] ? '' : 'invisible'">
+      <img v-if="!props.isCollected" @click.stop="collectFile" src="/myResources/interactive/star_Stroke.png">
+      <img v-else @click.stop="cancelCollection" src="/myResources/interactive/star_filled.png">
+    </div>
   </div>
-  <p class="text-center truncate">{{props['fileName']}}</p>
+  <p v-if="!props.isRename" class="text-center truncate">{{props['fileName']}}</p>
+  <input v-else @blur.stop="endRenaming" @keyup.enter="endRenaming" ref="renameInput" v-model="newName" type="text" class="input input-xs w-full text-base"/>
 </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import {onMounted, ref, watchEffect} from "vue";
 
-const varemit = defineEmits(['selectFile','unselectFile','selectOne','changeDirectory'])
-const props = defineProps(['index','fileName','fileType','isSelected']);
+const varemit = defineEmits(['selectFile','unselectFile','selectOne','changeDirectory','endRenaming','collectFile','cancelCollection'])
+const props = defineProps(['index','fileName','fileType','isSelected','isRename','isCollected']);
+
+const newName = ref<string>(props.fileName)
+const renameInput = ref(null);
+
+onMounted(()=>{
+  // console.log(newName.value)
+})
+
+watchEffect(() => {
+  if (props.isRename) {
+    // 确保input元素已经挂载
+    if (renameInput.value) {
+      renameInput.value.select();
+    }
+  }
+});
 
 const fileIcon = [
   '/myResources/fileIcon/display-folder.png',
@@ -40,7 +63,9 @@ const getFileIconInd = (type) => {
     case "文件夹":
       return 0
       break
-    case '':
+    case 'png文件':
+      return 4
+      break
   }
 }
 
@@ -49,6 +74,10 @@ const showIcon = () => {
 }
 const notShowIcon = () => {
   isShowIcon.value = false
+}
+
+const endRenaming = () => {
+  varemit('endRenaming',newName.value)
 }
 
 const selectFile = () => {
@@ -65,6 +94,23 @@ const selectOne = () => {
 
 const changeDirectory = () => {
   varemit('changeDirectory',props['index'])
+}
+
+const handleClick = (event) => {
+  if (event.ctrlKey) {
+    selectFile();
+  }else{
+    selectOne()
+  }
+}
+
+const collectFile = () => {
+  selectOne();
+  varemit('collectFile')
+}
+
+const cancelCollection = () => {
+  varemit('cancelCollection',props.index)
 }
 </script>
 

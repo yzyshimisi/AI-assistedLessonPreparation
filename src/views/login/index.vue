@@ -96,7 +96,6 @@ const getUserInfo = () => {
     onSuccess(res){
       if(res['code']===200){
         userinfostore.setInfo(res['data']);
-        console.log(userinfostore.userInfo);
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }

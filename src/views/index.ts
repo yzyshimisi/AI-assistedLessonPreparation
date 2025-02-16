@@ -6,6 +6,8 @@ import AIChat from "./AIChat/index.vue";
 import home from "./home/index.vue";
 import userInfo from "./userInfo/index.vue";
 import myResources from "./myResources/index.vue";
+import lessonPreparationMaterials from "./lessonPreparationMaterials/index.vue";
+import classManagement from "./classManagement/index.vue";
 
 export {
     login,
@@ -16,4 +18,6 @@ export {
     home,
     userInfo,
     myResources,
+    lessonPreparationMaterials,
+    classManagement,
 }
