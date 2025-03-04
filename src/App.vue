@@ -1,7 +1,9 @@
 <template>
-<div class="h-screen bg-base-200">
+<div class="max-h-[1200px] min-h-screen bg-base-200">
   <img src="/topPic.png" class="w-full h-[75px]">
-  <navbar></navbar>
+  <div class="flex">
+    <navbar></navbar>
+  </div>
   <div class="flex mt-1">
     <sidebar v-if="loginstore.loginSession"></sidebar>
     <router-view />

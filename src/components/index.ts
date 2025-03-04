@@ -8,6 +8,8 @@ import myMenu from "./myMenu/index.vue";
 import classUserManagement from "./classUserManagement/index.vue";
 import classCoursesManagement from "./classCoursesManagement/index.vue";
 import recycleBinDia from "./recycleBinDia/index.vue";
+import myCollectionDia from "./myCollectionDia/index.vue";
+import editCourseDia from "./editCourseDia/index.vue";
 
 export {
     chatBox,
@@ -20,4 +22,6 @@ export {
     classUserManagement,
     classCoursesManagement,
     recycleBinDia,
+    myCollectionDia,
+    editCourseDia,
 }

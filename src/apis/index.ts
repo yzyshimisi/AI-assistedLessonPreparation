@@ -24,6 +24,17 @@ import userUploadAPI from "./Server/userUploadAPI";
 import getRecycleListAPI from "./Server/myResources/getRecycleListAPI";
 import restoreFileAPI from "./Server/myResources/restoreFileAPI";
 import completelyDelAPI from "./Server/myResources/completelyDelAPI";
+import getCourseListAPI from "./Server/classManagement/getCourseListAPI";
+import createCourseAPI from "./Server/classManagement/createCourseAPI";
+import getClassListAPI from "./Server/classManagement/getClassListAPI";
+import deleteCourseAPI from "./Server/classManagement/deleteCourseAPI";
+import getTimetableAPI from "./Server/classManagement/getTimetableAPI";
+import oneClickInputAPI from "./Server/classManagement/classUserManagement/oneClickInputAPI";
+import editCourseAPI from "./Server/classManagement/editCourseAPI";
+import getCourseClassesListAPI from "./Server/classManagement/classUserManagement/getCourseClassesListAPI";
+import addStudentInfoAPI from "./Server/classManagement/classUserManagement/addStudentInfoAPI";
+import getStudentInfoAPI from "./Server/classManagement/classUserManagement/getStudentInfoAPI";
+import editStudentInfoAPI from "./Server/classManagement/classUserManagement/editStudentInfoAPI";
 
 export {
     loginAPI,
@@ -52,4 +63,15 @@ export {
     getRecycleListAPI,
     restoreFileAPI,
     completelyDelAPI,
+    getCourseListAPI,
+    createCourseAPI,
+    getClassListAPI,
+    deleteCourseAPI,
+    getTimetableAPI,
+    oneClickInputAPI,
+    editCourseAPI,
+    getCourseClassesListAPI,
+    addStudentInfoAPI,
+    getStudentInfoAPI,
+    editStudentInfoAPI,
 }

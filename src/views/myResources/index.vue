@@ -7,8 +7,8 @@
     <li><a>Item 3</a></li>
     <div class="absolute bottom-[50px] w-[155px] flex flex-col gap-2">
       <div style="border-bottom: 1px solid #000000;" class="w-[155px]"></div>
-      <li><a><el-icon><Star /></el-icon>我的收藏</a></li>
-      <li onclick="recycleBinDia.showModal()"><a><el-icon><Delete /></el-icon>回收站</a></li>
+      <li @click="openMyCollection" onclick="myCollectionDia.showModal()"><a><el-icon><Star /></el-icon>我的收藏</a></li>
+      <li @click="openRecycleBin" onclick="recycleBinDia.showModal()"><a><el-icon><Delete /></el-icon>回收站</a></li>
       <div style="border-bottom: 1px solid #000000;" class="w-[155px]"></div>
     </div>
   </ul>
@@ -163,7 +163,8 @@
     <button>close</button>
   </form>
 </dialog>
-<recycleBinDia></recycleBinDia>
+<recycleBinDia :isOpen="isOpenRecycleBin" @restoreFile="restoreFile"></recycleBinDia>
+<myCollectionDia></myCollectionDia>
 </template>
 
 <script setup lang="ts">
@@ -171,11 +172,13 @@ import { ref, reactive, onMounted, watch, inject } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, filterFileTypeAPI } from "../../apis"
 import { ElNotification } from 'element-plus'
-import { displayFile, myMenu, recycleBinDia } from "../../components"
+import { displayFile, myMenu, recycleBinDia, myCollectionDia } from "../../components"
 import { ElMessage } from 'element-plus'
 import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 
 const isExpand = ref<boolean>(false);
+
+const isOpenRecycleBin = ref<boolean>(false);
 
 const filterDic = {
   '全部': '',
@@ -507,7 +510,8 @@ const deleteFile = () => {
   useRequest(()=>deleteFileAPI({ids:ids}),{
     onSuccess(res){
       if(res['code']===200){
-        fileList.value = fileList.value.filter((val)=>!ids.includes(val['id']))
+        fileList.value = []
+        getFileList()
 
         selectedFilesInd.value = [];
         selectedFileNum.value = 0
@@ -668,6 +672,17 @@ const searchFile = () => {
       }
     }
   })
+}
+
+const openRecycleBin = () => {
+  isOpenRecycleBin.value = true
+  setTimeout(()=>{
+    isOpenRecycleBin.value = false
+  },500)
+}
+
+const restoreFile = () => {
+  getFileList()
 }
 </script>
 

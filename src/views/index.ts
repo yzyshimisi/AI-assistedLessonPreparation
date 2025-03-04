@@ -8,6 +8,7 @@ import userInfo from "./userInfo/index.vue";
 import myResources from "./myResources/index.vue";
 import lessonPreparationMaterials from "./lessonPreparationMaterials/index.vue";
 import classManagement from "./classManagement/index.vue";
+import classAcademic from "./classAcademic/index.vue";
 
 export {
     login,
@@ -20,4 +21,5 @@ export {
     myResources,
     lessonPreparationMaterials,
     classManagement,
+    classAcademic,
 }

@@ -1,5 +1,5 @@
 <template>
-<ul class="menu bg-base-300 rounded-box w-[120px] h-screen text-base">
+<ul class="menu bg-base-300 rounded-box w-[120px] text-base">
   <li>
     <router-link to="/chat">
       <el-icon size="22"><ChatDotRound /></el-icon>

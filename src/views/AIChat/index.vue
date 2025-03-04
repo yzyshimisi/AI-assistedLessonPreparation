@@ -1,5 +1,5 @@
 <template>
-<div class="flex h-screen w-full bg-base-200 relative">
+<div class="flex min-h-screen w-full bg-base-200 relative">
   <div class="card bg-base-100 w-[200px] shadow-md">
     <div class="card-body">
       <div>
@@ -24,7 +24,7 @@
             <div class="flex"><el-icon><More /></el-icon></div></div>
         </div>
       </div>
-      <div class="flex flex-col gap-2 absolute bottom-[100px]">
+      <div class="flex flex-col gap-2 absolute top-[400px]">
         <h2 class="card-title flex justify-center mb-1">快速功能</h2>
         <div style="border-bottom: 2px solid #000000;"></div>
         <div v-for="(value,index) in funcList" @click="showFuncForms(index)">
