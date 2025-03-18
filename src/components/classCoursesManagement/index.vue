@@ -26,7 +26,7 @@
 <!--    <el-table-column prop="address" label="周五" width="180"/>-->
 <!--  </el-table>-->
   <div>
-    <div class="grid grid-cols-11 w-[1100px] h-[40px] bg-[#65558f] text-white rounded-lg">
+    <div class="grid grid-cols-11 w-[1000px] h-[40px] bg-[#65558f] text-white rounded-lg">
       <p class="col-span-1 flex justify-center items-center border-r">节次</p>
       <p class="col-span-2 flex justify-center items-center border-r">周一</p>
       <p class="col-span-2 flex justify-center items-center border-r">周二</p>
@@ -35,7 +35,7 @@
       <p class="col-span-2 flex justify-center items-center">周五</p>
     </div>
     <div class="overflow-x-auto mt-2">
-      <table class="table text-base w-[1100px]">
+      <table class="table text-base w-[1000px]">
         <tbody>
         <tr v-for="(value,index) in tableTimeData" class="bg-[#f3f1ff]">
           <td class="w-[100px] max-w-[100px] border-2 border-[#7c6ea1]">{{ SECTION[index]+'节'}}</td>
@@ -52,7 +52,7 @@
     </div>
   </div>
   <p class="text-2xl text-[#625e76]">管理课程</p>
-  <div class="overflow-x-auto bg-[#fef7fe] h-[230px]">
+  <div class="overflow-x-auto bg-[#fef7fe] h-[230px] mb-12">
     <table class="table text-base">
       <thead>
       <tr class="text-base">

@@ -72,6 +72,7 @@
           id="displayFileArea"
       >
         <div class="grid grid-cols-5 auto-rows-[120px] gap-3 w-[800px] h-[400px] overflow-auto mt-4">
+          <!-- 文件区域 -->
           <displayFile
               v-for="(value,index) in fileList" @contextmenu.prevent="openMenu($event,index)"
 

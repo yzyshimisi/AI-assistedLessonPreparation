@@ -10,6 +10,12 @@ import classCoursesManagement from "./classCoursesManagement/index.vue";
 import recycleBinDia from "./recycleBinDia/index.vue";
 import myCollectionDia from "./myCollectionDia/index.vue";
 import editCourseDia from "./editCourseDia/index.vue";
+import examScoreManagement from "./examScoreManagement/index.vue";
+import queryScore  from "./queryScore/index.vue";
+import examScoreSummary from "./examScoreSummary/index.vue";
+import examScoreAnalyse from "./examScoreAnalyse/index.vue";
+import stuChapterAnalyse from "./stuChapterAnalyse/index.vue";
+import examTranscript from "./examTranscript/index.vue";
 
 export {
     chatBox,
@@ -24,4 +30,10 @@ export {
     recycleBinDia,
     myCollectionDia,
     editCourseDia,
+    examScoreManagement,
+    queryScore,
+    examScoreSummary,
+    examScoreAnalyse,
+    stuChapterAnalyse,
+    examTranscript,
 }

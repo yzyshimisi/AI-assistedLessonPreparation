@@ -1,7 +1,7 @@
 <template>
 <div class="h-screen w-screen bg-base-200 flex gap-1">
   <myMenu></myMenu>
-  <div class="card bg-base-100 w-[30%] h-[500px] shadow-xl">
+  <div class="card bg-base-100 w-[30%] h-[500px] shadow-xl ml-[100px] mt-[50px]">
     <div class="card-body">
       <div class="flex items-center">
         <div class="flex flex-col">

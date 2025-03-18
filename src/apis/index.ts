@@ -35,6 +35,19 @@ import getCourseClassesListAPI from "./Server/classManagement/classUserManagemen
 import addStudentInfoAPI from "./Server/classManagement/classUserManagement/addStudentInfoAPI";
 import getStudentInfoAPI from "./Server/classManagement/classUserManagement/getStudentInfoAPI";
 import editStudentInfoAPI from "./Server/classManagement/classUserManagement/editStudentInfoAPI";
+import getAcademicAchieveAPI from "./Server/classAcademic/getAcademicAchieveAPI";
+import delStudentInfoAPI from "./Server/classManagement/classUserManagement/delStudentInfoAPI";
+import updateScoreAPI from "./Server/classAcademic/updateScoreAPI";
+import addScoreAPI from "./Server/classAcademic/addScoreAPI";
+import delScoreAPI from "./Server/classAcademic/delScoreAPI";
+import exportScoreAPI from "./Server/classAcademic/exportScoreAPI";
+import obtainClassListAPI from "./Server/classAcademic/examScoreSummary/obtainClassListAPI";
+import getAverageGpaAPI from "./Server/classAcademic/examScoreSummary/getAverageGpaAPI";
+import getScoreOverviewAPI from "./Server/classAcademic/examScoreSummary/getScoreOverviewAPI";
+import getClassStudentListAPI from "./Server/classAcademic/examScoreAnalyse/getClassStudentListAPI";
+import getStudentGpaRankAPI from "./Server/classAcademic/examScoreAnalyse/getStudentGpaRankAPI";
+import getStuCourseScoreAPI from "./Server/classAcademic/examScoreAnalyse/getStuCourseScoreAPI";
+import getStuChapterScoreAPI from "./Server/classAcademic/examScoreAnalyse/getStuChapterScoreAPI";
 
 export {
     loginAPI,
@@ -74,4 +87,17 @@ export {
     addStudentInfoAPI,
     getStudentInfoAPI,
     editStudentInfoAPI,
+    getAcademicAchieveAPI,
+    delStudentInfoAPI,
+    updateScoreAPI,
+    addScoreAPI,
+    delScoreAPI,
+    exportScoreAPI,
+    obtainClassListAPI,
+    getAverageGpaAPI,
+    getScoreOverviewAPI,
+    getClassStudentListAPI,
+    getStudentGpaRankAPI,
+    getStuCourseScoreAPI,
+    getStuChapterScoreAPI,
 }

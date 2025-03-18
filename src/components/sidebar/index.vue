@@ -13,10 +13,10 @@
     </router-link>
   </li>
   <li>
-    <a>
+    <router-link to="/myResources">
       <el-icon size="22"><User /></el-icon>
       我的
-    </a>
+    </router-link>
   </li>
 </ul>
 </template>

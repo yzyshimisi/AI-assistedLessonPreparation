@@ -1,7 +1,7 @@
 <template>
 <div class="flex flex-col mt-4 gap-5">
   <div class="flex gap-4 items-center h-[40px]">
-    <select v-model="courseId" class="select select-bordered select-sm h-full text-base bg-base-200 font-normal">
+    <select v-model="courseId" class="select select-bordered select-sm h-full text-base bg-base-200 font-normal w-[200px]">
       <option disabled selected value="-1">请选择课程</option>
       <option v-for="(value,key,index) in courseList" :value="value['id']">{{value['course_name']}}</option>
     </select>
@@ -26,7 +26,7 @@
       {{ value }}
     </button>
   </div>
-  <div class="divider w-[1100px]"></div>
+  <div class="divider w-[1000px]"></div>
   <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
     <table class="table text-base bg-[#fef7ff]">
       <thead>
@@ -39,7 +39,7 @@
         <th>专业</th>
         <th v-if="!isMultiChoice"><button @click="isMultiChoice=true" class="btn btn-outline btn-sm">多选</button></th>
         <th v-else class="flex gap-2">
-          <button @click="isMultiChoice=true" class="btn btn-outline btn-sm">确认删除</button>
+          <button @click="delMultiple" class="btn btn-outline btn-sm">确认删除</button>
           <button @click="endMultiChoice" class="btn btn-outline btn-sm">取消多选</button>
         </th>
       </tr>
@@ -49,9 +49,9 @@
           v-for="(value,index) in stuList"
           @click="changeCho(index)"
           class="hover:bg-[#e8def7]"
-          :class="[isChoStuList[index] ? 'bg-base-200' : '',isMultiChoice ? 'cursor-pointer' : '']"
+          :class="[isChoStuList[index] ? 'bg-[#e8def7]' : '',isMultiChoice ? 'cursor-pointer' : '']"
       >
-        <td v-if="isMultiChoice"><input v-model="isChoStuList[index]" type="checkbox" class="checkbox" /></td>
+        <td v-if="isMultiChoice"><input v-model="isChoStuList[index]" type="checkbox" class="checkbox checkbox-sm" /></td>
         <td>{{ value['name'] }}</td>
         <td>{{ value['class']}}</td>
         <td>{{ value['student_id']}}</td>
@@ -59,7 +59,7 @@
         <td>{{ value['major']}}</td>
         <td class="flex gap-2">
           <button @click="editStuInfo(index)" class="btn btn-outline btn-info btn-sm">编辑</button>
-          <button class="btn btn-outline btn-error btn-sm">删除</button>
+          <button @click="delOneInfo(index)" class="btn btn-outline btn-error btn-sm">删除</button>
         </td>
       </tr>
       </tbody>
@@ -132,7 +132,7 @@
       <div class="flex items-center gap-2 mt-2">
         <p>班级：</p><input @keyup.enter.stop="editStudentInfo" v-model="editedStudentInfo.class" type="text" placeholder="请输入学生所在的行政班级" class="input input-bordered w-[280px]" />
       </div>
-      <div class="flex justify-center gap-7">
+      <div class="flex justify-center gap-7 mt-4">
         <button @click="editStudentInfo" onclick="manualInput.close()" class="btn bg-[#65558f] pl-14 pr-14 text-base-100 hover:bg-purple-900">保存</button>
         <button onclick="editDialog.close()" class="btn btn-active pl-14 pr-14">取消</button>
       </div>
@@ -149,7 +149,7 @@ import { onMounted, ref, watch } from "vue";
 import { getCourseListAPI } from "../../apis"
 import { useRequest } from "vue-hooks-plus";
 import { ElMessage,ElNotification } from "element-plus";
-import { oneClickInputAPI, getCourseClassesListAPI, addStudentInfoAPI, getStudentInfoAPI, editStudentInfoAPI } from "../../apis"
+import { oneClickInputAPI, getCourseClassesListAPI, addStudentInfoAPI, getStudentInfoAPI, editStudentInfoAPI, delStudentInfoAPI } from "../../apis"
 
 const isShowAddUserForm = ref<boolean>(false);
 
@@ -157,6 +157,8 @@ const courseList = ref<Array<Object>>([]);
 const courseId = ref<number>(-1);
 
 watch(()=>courseId.value,()=>{
+  nowCourseClassInd.value = -1
+  stuList.value = []
   getCourseClassesList();
 })
 
@@ -188,13 +190,12 @@ const isChoStuList = ref<Array<boolean>>([])
 
 const isMultiChoice = ref<boolean>(false)
 
-watch([()=>courseId.value,()=>nowCourseClassInd.value],()=>{
+watch(()=>nowCourseClassInd.value,()=>{
   getStudentInfo();
 })
 
 onMounted(()=>{
   getCourseList()
-  getStudentInfo()
 })
 
 const getStudentInfo = () => {
@@ -339,6 +340,36 @@ const editStudentInfo = () => {
       }
     }
   })
+}
+
+const delOneInfo = (ind) => {
+  isChoStuList.value[ind] = true;
+  delStudentInfo()
+}
+
+const delStudentInfo = () => {
+  let student_ids = []
+  for(let i=0; i<isChoStuList.value.length; i++){
+    if(isChoStuList.value[i]){
+      student_ids.push(stuList.value[i]['student_id'])
+    }
+  }
+  if(student_ids.length === 0) return
+  useRequest(()=>delStudentInfoAPI({student_ids:student_ids}),{
+    onSuccess(res){
+      if(res['code']===200){
+        getStudentInfo();
+        ElMessage({message: '删除成功！', type: 'success',})
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
+}
+
+const delMultiple = () => {
+  delStudentInfo();
+  isMultiChoice.value = false
 }
 </script>
 
