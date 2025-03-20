@@ -1,5 +1,5 @@
 <template>
-<div class="max-h-[1200px] min-h-screen bg-base-200">
+<div class="max-h-[2000px] min-h-screen bg-base-200">
   <img src="/topPic.png" class="w-full h-[75px]">
   <navbar></navbar>
   <div class="flex mt-1">

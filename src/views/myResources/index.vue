@@ -13,10 +13,24 @@
     </div>
   </ul>
   <div class="ml-4 flex flex-col gap-3">
-    <div class="breadcrumbs text-sm">
-      <ul>
-        <li v-for="(value,index) in nowPath" @click="backToDirectory(index)"><a>{{ Object.keys(value)[0] }}</a></li>
-      </ul>
+    <div class="flex justify-between">
+      <div class="breadcrumbs text-base">
+        <ul>
+          <li v-for="(value,index) in nowPath" @click="backToDirectory(index)"><a>{{ Object.keys(value)[0] }}</a></li>
+        </ul>
+      </div>
+      <div class="avatar-group -space-x-6">
+        <div v-for="(value,index) in avatarUrls" class="avatar">
+          <div class="w-8">
+            <img :src="value" />
+          </div>
+        </div>
+        <div class="avatar avatar-placeholder">
+          <div class="bg-neutral text-neutral-content w-8">
+            <p class="text-center">...</p>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="bg-base-100 w-[1100px] h-[700px] p-4 relative">
       <div class="flex items-center relative">
@@ -71,7 +85,7 @@
           class="w-[1050px] h-[500px] overflow-auto mt-4"
           id="displayFileArea"
       >
-        <div class="grid grid-cols-5 auto-rows-[120px] gap-3 w-[800px] h-[400px] overflow-auto mt-4">
+        <div class="grid grid-cols-5 auto-rows-[120px] gap-3 w-[800px] h-[400px] mt-4">
           <!-- 文件区域 -->
           <displayFile
               v-for="(value,index) in fileList" @contextmenu.prevent="openMenu($event,index)"
@@ -92,6 +106,7 @@
               :index= "index"
               :fileName= "value['name']"
               :fileType= "value['file_type']"
+              :fileUrl = "value['file_url']"
               :isRename= "index===renameFileInd"
               :isCollected= "value['is_collect']"
 
@@ -128,15 +143,16 @@
 >
   <li @click="changeDirectory(selectedFilesInd[0])"><a>打开</a></li>
   <li><a>下载</a></li>
-  <li><a>分享</a></li>
+  <li onclick="shareLinkDia.showModal()"><a>分享</a></li>
   <div style="border-bottom: 1px solid #000000;" class="w-full my-1"></div>
   <li v-show="selectedFilesInd.length === 1" @click="rename"><a>重命名</a></li>
   <li><a>移动到</a></li>
-  <li @click="getFileInfo" onclick="fileInfo.showModal()"><a>详细信息</a></li>
+  <li @click="getFileInfo" onclick="fileInfoDia.showModal()"><a>详细信息</a></li>
   <div style="border-bottom: 1px solid #000000;" class="w-full my-1"></div>
   <li @click="deleteFile"><a>删除</a></li>
 </ul>
-<dialog id="fileInfo" class="modal">
+<!--  对话框区域 -->
+<dialog id="fileInfoDia" class="modal">
   <div class="modal-box w-[450px]">
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -166,6 +182,7 @@
 </dialog>
 <recycleBinDia :isOpen="isOpenRecycleBin" @restoreFile="restoreFile"></recycleBinDia>
 <myCollectionDia></myCollectionDia>
+<shareLinkDia></shareLinkDia>
 </template>
 
 <script setup lang="ts">
@@ -173,13 +190,18 @@ import { ref, reactive, onMounted, watch, inject } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, filterFileTypeAPI } from "../../apis"
 import { ElNotification } from 'element-plus'
-import { displayFile, myMenu, recycleBinDia, myCollectionDia } from "../../components"
+import { displayFile, myMenu, recycleBinDia, myCollectionDia, shareLinkDia } from "../../components"
 import { ElMessage } from 'element-plus'
 import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 
-const isExpand = ref<boolean>(false);
-
-const isOpenRecycleBin = ref<boolean>(false);
+const avatarUrls = [
+  "https://randomuser.me/api/portraits/men/1.jpg",
+  "https://randomuser.me/api/portraits/men/2.jpg",
+  "https://randomuser.me/api/portraits/lego/1.jpg",
+  "https://i.pravatar.cc/200",
+  "https://robohash.org/test2",
+  "https://robohash.org/test3"
+];
 
 const filterDic = {
   '全部': '',
@@ -200,9 +222,13 @@ const fileIcon = [
   '/myResources/fileIcon/display-zip.png',
 ]
 
+const isExpand = ref<boolean>(false);
+
+const isOpenRecycleBin = ref<boolean>(false);
+
 const filterCho = ref<number>(0);
 
-const selectedFilesInd = ref([]);
+const selectedFilesInd = ref([]);   // 选择的所有文件的索引列表
 
 const selectedFileNum = ref<number>(0);
 
@@ -248,6 +274,7 @@ const selectMaskOldPos = ref({
 
 onMounted(()=>{
   getFileList();
+  console.log(fileList.value)
 })
 
 const startDragSelect = (event) => {  // 按下鼠标，开始拖动多选
@@ -488,7 +515,6 @@ const createDir = async () => {
           getFileList()
         }
         let tmpDelay = watch(()=>fileList.value,(newValue,oldValue)=>{
-          console.log(fileList.value)
           selectOne(fileList.value.length-1);
           renameFileInd.value = fileList.value.length -1;
           tmpDelay();

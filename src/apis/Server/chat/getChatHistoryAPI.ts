@@ -3,9 +3,9 @@ import { request } from "../../request";
 const token = localStorage.getItem('token')
 
 const getChatHistoryAPI = async (query:{
-    id?: number,
-    page_num?: number,
-    page_size?: number,
+    id: number,
+    page_num: number,
+    page_size: number,
 }) => {
     let url = "/api/chat/history?";
     for(let key in query){

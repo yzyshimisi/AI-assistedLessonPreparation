@@ -1,18 +1,18 @@
 <template>
 <div class="w-[375px] h-[1500px] bg-base-100 rounded-xl p-5 flex flex-col gap-7">
   <div>
-    <span><span class="text-red-600">* </span>教案名称</span>
-    <input type="text" placeholder="Type here" class="input input-bordered w-full mt-2" />
+    <span><span class="text-red-600">* </span>教案名称<el-icon @click="closeFuncForm()" class="float-right hover:cursor-pointer"><Close /></el-icon></span>
+    <input type="text" placeholder="请输入教案的名称" class="input input-bordered w-full mt-2" />
   </div>
   <div class="flex gap-4">
     <div class="flex flex-col flex-1">
       <span><span class="text-red-600">* </span>专业学科</span>
-      <input type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs mt-2" />
+      <input type="text" placeholder="请输入专业学科" class="input input-bordered w-full max-w-xs mt-2" />
     </div>
     <div class="flex flex-col flex-1">
       <span><span class="text-red-600">* </span>总课时</span>
-      <select class="select select-bordered w-full max-w-xs mt-2">
-        <option disabled selected>Who shot first?</option>
+      <select class="select select-bordered w-full max-w-xs mt-2 text-base">
+        <option disabled selected>选择总课时</option>
         <option>Han Solo</option>
         <option>Greedo</option>
       </select>
@@ -20,7 +20,7 @@
   </div>
   <div>
     <span><span class="text-red-600">* </span>课题名称</span>
-    <input type="text" placeholder="Type here" class="input input-bordered w-full mt-2" />
+    <input type="text" placeholder="请输入课题名称" class="input input-bordered w-full mt-2" />
   </div>
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>教案模板文件</span>
@@ -77,7 +77,7 @@
   </div>
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>其他要求</span>
-    <textarea class="textarea textarea-bordered resize-none h-[100px]" placeholder="Bio"></textarea>
+    <textarea class="textarea textarea-bordered text-base resize-none h-[100px]" placeholder="输入其他的要求"></textarea>
   </div>
   <img @click="createLessonPlans" src="/aichat/funcFormSub.png" class="hover:cursor-pointer">
 </div>
@@ -86,6 +86,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { UploadProps, UploadUserFile } from 'element-plus'
+
+const varemit = defineEmits(["closeFuncForm"])
+
+const formInfo = ref<object>({
+
+})
 
 const dialogImageUrl = ref('')  // 预览对话框
 const dialogVisible = ref(false)  // 对话框显示
@@ -115,6 +121,10 @@ const createLessonPlans = () => {
     console.log(fileList.value[i].raw);
   }
   console.log(templateFile.value)
+}
+
+const closeFuncForm = () => {
+  varemit('closeFuncForm')
 }
 </script>
 

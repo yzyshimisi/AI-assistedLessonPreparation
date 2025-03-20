@@ -2,9 +2,10 @@
   <div
       v-if="!isModify"
       @dblclick="modify"
-      class="hover:bg-base-200"
+      class="hover:bg-base-200 py-2 px-2 rounded-2xl"
+      :key="props.data"
   >
-    <span>{{data}}</span>
+    <p>{{ data }}</p>
   </div>
   <div v-else class="hover:bg-base-200">
     <input
@@ -13,20 +14,24 @@
       @keyup.enter="overModify"
       id="textInput"
       type="text"
-      class="input-xs w-full max-w-xs text-base"
+      class="input-sm w-full text-base h-[40px] rounded-xl py-2"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from "vue";
+import {ref, nextTick, watch} from "vue";
 
 const isModify = ref(false);
 
 const props = defineProps(['data','font-size']);
 const varemit = defineEmits(["overModify"])
 
-const data = ref(props.data)
+const data = ref<string>(props.data)
+
+watch(()=>props.data,()=>{
+  data.value = props.data
+})
 
 const modify = () => {
   isModify.value = true
@@ -37,8 +42,12 @@ const modify = () => {
   })
 }
 const overModify = () => {
-  isModify.value = false
-  varemit('overModify',data.value)
+  if(isModify.value === true){
+    isModify.value = false
+    if(data.value !== props.data){
+      varemit('overModify',data.value)
+    }
+  }
 }
 </script>
 
