@@ -25,8 +25,8 @@
           </div>
         </div>
         <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+          <li><router-link to="/userInfo">个人信息</router-link></li>
           <li><a @click="loginOut">退出登录</a></li>
-          <li><a>Item 2</a></li>
         </ul>
       </div>
     </ul>

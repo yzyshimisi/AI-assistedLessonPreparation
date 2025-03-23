@@ -28,3 +28,4 @@ interface addScoreType{
     final_score: string,
     total_score: string
 }
+

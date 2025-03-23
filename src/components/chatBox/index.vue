@@ -2,13 +2,13 @@
 <div class="fixed bottom-[20px] mt-5" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
   <div
       id="chatBox"
-      class="overflow-auto bg-base-300"
+      class="overflow-y-scroll bg-base-300 px-5 py-8"
       :class="[props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]']"
   >
-    <div v-for="(value,index) in chatMsg" class="mt-2">
+    <div v-for="(value,index) in chatMsg" class="mb-2">
       <div class="chat" :class="[chatMsg[index]['role'] === 'user' ? 'chat-end' : 'chat-start']">
         <div class="chat-image avatar">
-          <div class="w-14 rounded-full">
+          <div class="w-12 rounded-full">
             <img
                 alt="Failed"
                 :src="[chatMsg[index]['role'] === 'user' ? userinfostore.userInfo.avatar : '/aichat/aiAvatar.png']" />
@@ -19,15 +19,23 @@
         </div>
       </div>
     </div>
+    <!-- 加载图标-->
+    <div v-show="isWaitingRes" class="mt-2 mb-4 gap-1 flex justify-center" :class="[props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]']">
+      <span class="loading loading-dots loading-xs"></span>
+      <span class="loading loading-dots loading-sm"></span>
+      <span class="loading loading-dots loading-md"></span>
+      <span class="loading loading-dots loading-lg"></span>
+    </div>
   </div>
   <div class="textarea textarea-bordered  flex w-[1000px] mt-7" :class="props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]'">
     <textarea
         v-model="textInput"
+        @keydown.enter.prevent="enterKeyDown"
         id="textArea"
         class="outline-none text-lg w-[1100px] max-h-[210px] resize-none"
         placeholder="请输入你想问的问题">
     </textarea>
-    <el-icon :size="33" class="relative bottom-[-10px] ml-2 hover:bg-base-300 cursor-pointer"><Promotion /></el-icon>
+    <el-icon @click="sendMsg" :size="33" class="relative bottom-[-10px] ml-2 hover:bg-base-300 cursor-pointer"><Promotion /></el-icon>
   </div>
 </div>
 </template>
@@ -35,17 +43,38 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch, nextTick,} from "vue";
 import { useRequest } from "vue-hooks-plus";
-import { getChatHistoryAPI } from "../../apis";
-import { ElNotification } from 'element-plus';
+import { getChatHistoryAPI, sendMsgAPI } from "../../apis";
+import {ElMessage, ElNotification} from 'element-plus';
 import { useMainStore } from "../../stores";
 
 const userinfostore = useMainStore().userInfoStore();
 
-const textInput = ref<string>("");
+const textInput = ref<string>("");    // 文本框
 
-const chatMsg = ref([]);
+const chatMsg = ref([]);    // 记录
+const resMsg = ref<string>('')    // 用于实现打字效果
 
-const props = defineProps(['id','isOpenFuncForm']);  // 接收父组件传来的会话id、是否开启功能表单
+const isWaitingRes = ref<boolean>(false)
+
+
+const props = defineProps(['id','isOpenFuncForm','isWaitRes','lessonPlanRes']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
+
+
+watch([()=>props.isWaitRes],()=>{
+  if(props.isWaitRes === true){
+    isWaitingRes.value = props.isWaitRes
+    let chatBox = document.getElementById('chatBox')    // 定位到最底部
+    chatBox.scrollTop = chatBox.scrollHeight
+  }else{
+    isWaitingRes.value = props.isWaitRes
+    chatMsg.value.push({
+      role: 'ai',
+      message: '',
+    })
+    resMsg.value = props.lessonPlanRes
+    print()
+  }
+})
 
 watch(()=>props.id,()=>{
   if(props.id !== -1)
@@ -57,13 +86,7 @@ const pageInfo = ref<object>({
   page_size: 10,
 })
 
-
 const chatBoxHeight = ref<number>(500)    // 这里的高度是除去文本框的高度，页面的滚动不会影响其值
-
-const originBoxHeight = window.scrollY > 145 ? chatBoxHeight.value + 145 :  chatBoxHeight.value + window.scrollY
-// 最原始的对话框高度（考虑到从滚动条中间位置刷新网页）
-
-console.log(originBoxHeight)
 
 const textArea = ref<HTMLElement>()    // 文本框DOM元素
 const textAreaOldH = ref<number>()   // 文本框的高度
@@ -80,30 +103,6 @@ watch(()=>windowScrollY.value,()=>{
   oldScrollY.value = windowScrollY.value
 })
 
-const getChatHistory = () => {
-  if(props.id === -1) return
-  useRequest(()=>getChatHistoryAPI({
-    id:props.id,
-    page_num: pageInfo.value['page_num'],
-    page_size: pageInfo.value['page_size']
-  }),{
-    onSuccess(res){
-      if(res['code']===200){
-        if(res['data']['chat_history']){
-          for(let i=0; i<res['data']['chat_history'].length; i++){
-            chatMsg.value.push(reactive(res['data']['chat_history'][i]));
-          }
-        }
-      }else{
-        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
-      }
-    },
-    onError(err){
-      ElNotification({title: 'Error', message: err.toString(), type: 'error',})
-    }
-  })
-}
-
 onMounted(()=>{
   nextTick(()=>{
     handleScroll()
@@ -115,6 +114,109 @@ onMounted(()=>{
 
   setTextArea()   // 设置文本框的监听
 })
+
+const sendMsg = () => {
+  if(props.id === -1) return
+  if(textInput.value === '' || textInput.value === '\n'){
+    textInput.value = ''
+    ElMessage({message: '请输入你的问题', type: 'warning',})
+    return
+  }
+  useRequest(()=>sendMsgAPI({
+    session_id: props.id,
+    message: textInput.value,
+  }),{
+    onBefore(){
+      isWaitingRes.value = true
+      chatMsg.value.push({
+        role: 'user',
+        message: textInput.value,
+      })
+      nextTick(()=>{
+        let chatBox = document.getElementById("chatBox");
+        chatBox.scrollTop = chatBox.scrollHeight
+      })
+    },
+    onSuccess(res){
+      if(res['code']===200){
+        chatMsg.value.push({
+          role: 'ai',
+          message: '',
+        })
+        resMsg.value = res['data']['message']
+        print()
+      }else{
+        getChatHistory()
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    },
+    onError(err){
+      getChatHistory()
+      ElNotification({title: 'Error', message: err.toString(), type: 'error',})
+    },
+    onFinally(){
+      isWaitingRes.value = false
+    }
+  })
+  textInput.value = ''
+}
+
+const print = () => {   // 通过chatMsg与resMsg实现打字效果
+  let chatBox = document.getElementById("chatBox");
+  if( chatMsg.value[chatMsg.value.length-1]['message'].length >= resMsg.value.length){
+    return
+  }
+  setTimeout(()=>{
+    let flag = false
+
+    if(chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 40){
+      flag = true
+    }
+    chatMsg.value[chatMsg.value.length - 1]['message'] += resMsg.value.charAt(chatMsg.value[chatMsg.value.length - 1]['message'].length);
+    if(flag){
+      chatBox.scrollTop = chatBox.scrollHeight
+    }
+    print()
+  },50)
+}
+
+const getChatHistory = () => {
+  if(props.id === -1) return
+  useRequest(()=>getChatHistoryAPI({
+    id:props.id,
+    page_num: pageInfo.value['page_num'],
+    page_size: pageInfo.value['page_size']
+  }),{
+    onSuccess(res){
+      if(res['code']===200){
+        chatMsg.value = []
+        if(res['data']['chat_history']){
+          for(let i=0; i<res['data']['chat_history'].length; i++){
+            chatMsg.value.push(res['data']['chat_history'][i]);
+          }
+        }
+        nextTick(()=>{
+          let chatBox = document.getElementById("chatBox");
+          chatBox.scrollTop = chatBox.scrollHeight
+        })
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    },
+    onError(err){
+      ElNotification({title: 'Error', message: err.toString(), type: 'error',})
+    }
+  })
+}
+
+const enterKeyDown = (e) => {
+  if(e.ctrlKey && e.keyCode==13) {    //用户点击了ctrl+enter触发
+    let textarea = document.getElementById('textArea') as HTMLTextAreaElement
+    textarea.value += '\n';
+  }else {       //用户点击了enter触发
+    sendMsg()
+  }
+}
 
 const setTextArea = () => {
   const observe = (element, event, handler) => {

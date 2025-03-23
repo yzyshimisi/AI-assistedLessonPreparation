@@ -1,34 +1,38 @@
 <template>
-<div class="w-[375px] h-[1500px] bg-base-100 rounded-xl p-5 flex flex-col gap-7">
+<div class="w-[375px] min-h-[1200px] bg-base-100 rounded-xl p-5 flex flex-col gap-7">
   <div>
     <span><span class="text-red-600">* </span>教案名称<el-icon @click="closeFuncForm()" class="float-right hover:cursor-pointer"><Close /></el-icon></span>
-    <input type="text" placeholder="请输入教案的名称" class="input input-bordered w-full mt-2" />
+    <input @keyup.enter="createLessonPlans" v-model="formInfo['textbook_name']" type="text" placeholder="请输入教案的名称" class="input input-bordered w-full mt-2" />
   </div>
   <div class="flex gap-4">
     <div class="flex flex-col flex-1">
       <span><span class="text-red-600">* </span>专业学科</span>
-      <input type="text" placeholder="请输入专业学科" class="input input-bordered w-full max-w-xs mt-2" />
+      <input @keyup.enter="createLessonPlans" v-model="formInfo['subject']" type="text" placeholder="请输入专业学科" class="input input-bordered w-full max-w-xs mt-2" />
     </div>
     <div class="flex flex-col flex-1">
       <span><span class="text-red-600">* </span>总课时</span>
-      <select class="select select-bordered w-full max-w-xs mt-2 text-base">
-        <option disabled selected>选择总课时</option>
-        <option>Han Solo</option>
-        <option>Greedo</option>
-      </select>
+      <input @keyup.enter="createLessonPlans" v-model="formInfo['total_hours']" type="text" placeholder="请输入总课时" class="input input-bordered w-full max-w-xs mt-2" />
+      <!--      <select class="select select-bordered w-full max-w-xs mt-2 text-base">-->
+<!--        <option disabled selected>选择总课时</option>-->
+<!--        <option>Han Solo</option>-->
+<!--        <option>Greedo</option>-->
+<!--      </select>-->
     </div>
   </div>
   <div>
     <span><span class="text-red-600">* </span>课题名称</span>
-    <input type="text" placeholder="请输入课题名称" class="input input-bordered w-full mt-2" />
+    <input @keyup.enter="createLessonPlans" v-model="formInfo['topic_name']" type="text" placeholder="请输入课题名称" class="input input-bordered w-full mt-2" />
   </div>
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>教案模板文件</span>
     <el-upload
+        ref="templateUpload"
         :on-change="templateFileChange"
+        :on-exceed="templateFileExceed"
         class="upload-demo"
         drag
         :auto-upload="false"
+        :limit="1"
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
       <div class="el-upload__text flex flex-col gap-2">
@@ -40,11 +44,13 @@
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>教案参考资料（课件/逐字稿/教案）</span>
     <el-upload
+        ref="referenceMaterialUpload"
         :on-change="referenceMaterialChange"
+        :on-exceed="referenceMaterialExceed"
         class="upload-demo"
         drag
-        action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-        multiple
+        :auto-upload="false"
+        :limit="1"
     >
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
       <div class="el-upload__text flex flex-col gap-2">
@@ -62,7 +68,6 @@
         multiple
         :limit="10"
         :on-preview="handlePictureCardPreview"
-        :on-remove="handleRemove"
     >
       <el-icon><Plus /></el-icon>
       <template #tip>
@@ -77,7 +82,7 @@
   </div>
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>其他要求</span>
-    <textarea class="textarea textarea-bordered text-base resize-none h-[100px]" placeholder="输入其他的要求"></textarea>
+    <textarea @keyup.enter.prevent="handleEnter" v-model="formInfo['description']" class="textarea textarea-bordered text-base resize-none h-[100px]" placeholder="输入其他的要求"></textarea>
   </div>
   <img @click="createLessonPlans" src="/aichat/funcFormSub.png" class="hover:cursor-pointer">
 </div>
@@ -85,46 +90,125 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import type { UploadProps, UploadUserFile } from 'element-plus'
+import type { UploadProps, UploadRawFile, UploadInstance,UploadUserFile } from 'element-plus'
+import {ElNotification, genFileId} from 'element-plus'
+import { lessonPlanUploadAPI, createLessonPlanAPI } from "../../apis"
+import {useRequest} from "vue-hooks-plus";
 
-const varemit = defineEmits(["closeFuncForm"])
+const varemit = defineEmits(["closeFuncForm",'startCreateLessonPlan','endCreateLessonPlan'])
+const props = defineProps(['session_id'])
 
-const formInfo = ref<object>({
-
+const formInfo = ref<createLessonPlanInfoType>({
+  textbook_name: '',
+  subject: '',
+  total_hours: '',
+  topic_name: '',
+  template_file: '',
+  resource_file: '',
+  textbook_img: '',
+  description: '',
+  session_id: -1,
 })
+
+const templateUpload = ref<UploadInstance>()
+const templateFile = ref<File | null>(null)
+
+const referenceMaterialUpload = ref<UploadInstance>()
+const referenceMaterialFile = ref<File | null>(null)
+
+const fileList = ref<UploadUserFile[]>([])
 
 const dialogImageUrl = ref('')  // 预览对话框
 const dialogVisible = ref(false)  // 对话框显示
 
-const templateFile = ref<UploadUserFile>()
-const fileList = ref<UploadUserFile[]>([])
+const lessonPlanRes = ref<string>('')
 
-const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
-  console.log(uploadFile, uploadFiles)
-}
-
-const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
+const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {  // 课本图片的显示
   dialogImageUrl.value = uploadFile.url!
   dialogVisible.value = true
 }
 
 const templateFileChange = (uploadFile,uploadFiles) => {
-
+  templateFile.value = uploadFile.raw
+}
+const templateFileExceed: UploadProps['onExceed'] = (files) => {
+  templateUpload.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  templateUpload.value!.handleStart(file)
 }
 
 const referenceMaterialChange = (uploadFile,uploadFiles) => {
-
+  referenceMaterialFile.value = uploadFile.raw
+}
+const referenceMaterialExceed: UploadProps['onExceed'] = (files) => {
+  referenceMaterialUpload.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  referenceMaterialUpload.value!.handleStart(file)
 }
 
-const createLessonPlans = () => {
-  for(let i=0;i<fileList.value.length;i++){
-    console.log(fileList.value[i].raw);
+const createLessonPlans = () => {     // 上传文件，并获取文件的URL
+  varemit('startCreateLessonPlan')
+  if(fileList.value.length>0){
+    for(let i=0;i<fileList.value.length;i++){
+      getFileUrl('textbook_img',fileList.value[i].raw)
+    }
   }
-  console.log(templateFile.value)
+  if(templateFile.value){
+    getFileUrl('template_file',templateFile.value)
+  }
+  if(referenceMaterialFile.value){
+    getFileUrl('resource_file',referenceMaterialFile.value)
+  }
+  formInfo.value['session_id'] = props.session_id
+
+  createLessonPlan()
+}
+
+const createLessonPlan = () => {    // 创建教案
+  useRequest(()=>createLessonPlanAPI(formInfo.value),{
+    onSuccess(res){
+      if(res['code']===200){
+        console.log(res)
+        lessonPlanRes.value = res['data']['message']
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    },
+    onFinally(){
+      varemit('endCreateLessonPlan',lessonPlanRes.value)
+    }
+  })
+}
+
+const getFileUrl = (key,file) => {
+  useRequest(()=>lessonPlanUploadAPI({file:file}),{
+    onSuccess(res){
+      if(res['code']===200){
+        if(key==='textbook_img'){
+          formInfo.value[key] += res['data']['url'] + ','
+        }else{
+          formInfo.value[key] = res['data']['url']
+        }
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
 }
 
 const closeFuncForm = () => {
   varemit('closeFuncForm')
+}
+
+const handleEnter = (e) => {
+  if(e.ctrlKey && e.keyCode==13) {    //用户点击了ctrl+enter触发
+    let textarea = document.getElementById('textArea') as HTMLTextAreaElement
+    textarea.value += '\n';
+  }else {       //用户点击了enter触发
+    createLessonPlans()
+  }
 }
 </script>
 

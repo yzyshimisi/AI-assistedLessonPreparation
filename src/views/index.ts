@@ -9,6 +9,7 @@ import myResources from "./myResources/index.vue";
 import lessonPreparationMaterials from "./lessonPreparationMaterials/index.vue";
 import classManagement from "./classManagement/index.vue";
 import classAcademic from "./classAcademic/index.vue";
+import sharedSpace from "./sharedSpace/index.vue";
 
 export {
     login,
@@ -22,4 +23,5 @@ export {
     lessonPreparationMaterials,
     classManagement,
     classAcademic,
+    sharedSpace,
 }

@@ -25,7 +25,7 @@
             <div class="flex"><el-icon><More /></el-icon></div></div>
         </div>
       </div>
-      <div class="flex flex-col gap-2 mt-[300px]">
+      <div class="flex flex-col gap-2 mt-[80px]">
         <h2 class="card-title flex justify-center mb-1">快速功能</h2>
         <div style="border-bottom: 2px solid #000000;"></div>
         <div v-for="(value,index) in funcList" @click="showFuncForms(index)">
@@ -35,8 +35,13 @@
       </div>
     </div>
   </div>
-  <div v-show="nowFuncForms === 0">
-    <lessonPlanDesign @closeFuncForm="closeFuncForm"></lessonPlanDesign>
+  <div v-show="nowFuncForms === 0">     <!-- 快速功能表单 -->
+    <lessonPlanDesign
+        @closeFuncForm="closeFuncForm"
+        @startCreateLessonPlan="isWaitRes = true"
+        @endCreateLessonPlan="endCreateLessonPlan"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></lessonPlanDesign>
   </div>
   <div v-if="nowTopicInd === -1 && nowFuncForms === -1" class="flex absolute bottom-0 left-[200px]">
     <div>
@@ -49,6 +54,8 @@
   <div v-if="nowTopicInd !== -1">
     <chatBox
         :id="topicList[nowTopicInd] ? topicList[nowTopicInd]['id'] : -1"
+        :isWaitRes="isWaitRes"
+        :lessonPlanRes="lessonPlanRes"
         :isOpenFuncForm="nowFuncForms!==-1"
     ></chatBox>
   </div>
@@ -104,10 +111,24 @@
 <dialog id="searchTopic" class="modal">
   <div class="modal-box">
     <div class="flex">
-      <input v-model="newTopicTitle" @keyup.enter="createTopic" type="text" placeholder="The title of the topic" class="input input-bordered w-full max-w-xs" />
+      <input v-model="searchTopicKey" type="text" placeholder="The title of the topic" class="input input-bordered w-full max-w-xs" />
     </div>
     <div class="mt-4 ml-2">提示：在所有历史记录中查找</div>
     <div class="divider"></div>
+    <div v-for="(value,index) in searchResult"
+         class="rounded-xl hover:bg-base-300 hover:cursor-pointer text-base p-2 mt-1"
+         :class="[index === nowTopicInd ? 'bg-base-300' : '']"
+         @click="chooseSearchTopic(index)"
+         onclick="searchTopic.close()"
+    >
+      <div class="flex flex-col justify-between">
+        <div class="w-[120px]"><p class="truncate font-bold">{{ value['title'] }}</p></div>
+        <div class="flex gap-8">
+          <p>修改于：{{ value['updated_at'].split(' ')[0] }}</p>
+          <p>创建于：{{ value['created_at'].split(' ')[0] }}</p>
+        </div>
+      </div>
+    </div>
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
@@ -121,7 +142,7 @@ import { useRequest } from "vue-hooks-plus";
 import { getTopicListAPI } from "../../apis/";
 import { ElNotification, ElMessage } from 'element-plus';
 import { useMainStore } from "../../stores";
-import { deleteTopicAPI, modifyTitleAPI, createTopicAPI } from "../../apis";
+import { deleteTopicAPI, modifyTitleAPI, createTopicAPI, searchTopicAPI } from "../../apis";
 import router from "../../router";
 import { useRoute } from "vue-router";
 import { chatBox, dClickEdit, lessonPlanDesign } from "../../components";
@@ -134,7 +155,6 @@ const dialogInd = ref<number>(-1);
 const newTopicTitle = ref<string>("");
 
 const nowTopicInd = ref<number>(-1);
-const nowRouter = useRoute();
 
 const funcList = reactive([
     '自定义教案设计',
@@ -146,6 +166,16 @@ const funcList = reactive([
     '一键配图',
 ])
 const nowFuncForms = ref<number>(-1);
+
+const searchTopicKey = ref<string>()
+const searchResult = ref<Array<object>>([])
+
+watch(()=>searchTopicKey.value,()=>{
+  run()
+})
+
+const isWaitRes = ref<boolean>(false);    // 用来在教案生成与聊天框组件中的数据传递
+const lessonPlanRes = ref<string>('');
 
 onMounted(()=>{
   getTopicList()
@@ -179,21 +209,6 @@ const getTopicList = () => {
     onError(err){
       ElNotification({title: 'Error', message: err.toString(), type: 'error',})
     },
-    onFinally(){
-      if(nowRouter.query['index']){
-        nowTopicInd.value = Number(nowRouter.query['index']);
-      }else{
-        nowTopicInd.value = -1;
-      }
-      watch(()=>nowRouter.query,(newQuery,oldQuery)=>{
-        nowFuncForms.value = -1;
-        if(nowRouter.query['index']){
-          nowTopicInd.value = Number(nowRouter.query['index']);
-        }else{
-          nowTopicInd.value = -1;
-        }
-      })
-    }
   })
 }
 
@@ -216,6 +231,19 @@ const modifyTitle = (newTitle) => {
     }
   })
 }
+
+const { data, run } = useRequest(()=>searchTopicAPI({key:searchTopicKey.value}),{
+  debounceWait: 500,
+  manual: true,
+  onSuccess(res){
+    if(res['code']===200){
+      searchResult.value = res['data']
+      console.log(searchResult.value)
+    }else{
+      ElNotification({title: 'Warning', message: res['msg'], type: 'warning',});
+    }
+  }
+})
 
 // const { data, run } = useRequest(()=>modifyTitleAPI({
 //   id: topicList.value[dialogInd.value]['id'],
@@ -282,17 +310,31 @@ const createTopic = () => {
   })
 }
 
+const chooseSearchTopic = (ind) => {
+  for(let i=0; i<topicList.value.length; i++){
+    // if(topicList.value[i][''])
+  }
+}
+
 const chooseTopic = (ind) => {
   nowTopicInd.value = ind;
-  router.push("/chat?index=".concat(String(nowTopicInd.value)))
 }
 
 const showFuncForms = (ind) => {
+  if(nowTopicInd.value === -1){
+    ElMessage({message: '请先选择一个会话', type: 'warning',})
+    return
+  }
   nowFuncForms.value = ind
 }
 
 const closeFuncForm = () => {
   nowFuncForms.value = -1
+}
+
+const endCreateLessonPlan = (str) => {
+  isWaitRes.value = false
+  lessonPlanRes.value = str
 }
 </script>
 

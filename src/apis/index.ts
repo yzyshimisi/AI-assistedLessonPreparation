@@ -48,6 +48,15 @@ import getClassStudentListAPI from "./Server/classAcademic/examScoreAnalyse/getC
 import getStudentGpaRankAPI from "./Server/classAcademic/examScoreAnalyse/getStudentGpaRankAPI";
 import getStuCourseScoreAPI from "./Server/classAcademic/examScoreAnalyse/getStuCourseScoreAPI";
 import getStuChapterScoreAPI from "./Server/classAcademic/examScoreAnalyse/getStuChapterScoreAPI";
+import createShareAPI from "./Server/myResources/createShareAPI";
+import publishResourcesAPI from "./Server/sourceMaterial/publishResourcesAPI";
+import getResourcesListAPI from "./Server/sourceMaterial/getResourcesListAPI";
+import searchResourcesAPI from "./Server/sourceMaterial/searchResourcesAPI";
+import searchTopicAPI from "./Server/chat/searchTopicAPI";
+import sendMsgAPI from "./Server/chat/sendMsgAPI";
+import lessonPlanUploadAPI from "./Server/lessonPlanDesign/lessonPlanUploadAPI";
+import createLessonPlanAPI from "./Server/lessonPlanDesign/createLessonPlanAPI";
+import resourceFileUploadAPI from "./Server/sourceMaterial/resourceFileUploadAPI";
 
 export {
     loginAPI,
@@ -100,4 +109,13 @@ export {
     getStudentGpaRankAPI,
     getStuCourseScoreAPI,
     getStuChapterScoreAPI,
+    createShareAPI,
+    publishResourcesAPI,
+    getResourcesListAPI,
+    searchResourcesAPI,
+    searchTopicAPI,
+    sendMsgAPI,
+    lessonPlanUploadAPI,
+    createLessonPlanAPI,
+    resourceFileUploadAPI,
 }

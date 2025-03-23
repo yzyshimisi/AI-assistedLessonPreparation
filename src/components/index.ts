@@ -17,6 +17,9 @@ import examScoreAnalyse from "./examScoreAnalyse/index.vue";
 import stuChapterAnalyse from "./stuChapterAnalyse/index.vue";
 import examTranscript from "./examTranscript/index.vue";
 import shareLinkDia from "./shareLinkDia/index.vue";
+import materialMenu from "./materialMenu/index.vue";
+import experienceDiscuss from "./experienceDiscuss/index.vue";
+import coursewareSharing from "./coursewareSharing/index.vue";
 
 export {
     chatBox,
@@ -38,4 +41,7 @@ export {
     stuChapterAnalyse,
     examTranscript,
     shareLinkDia,
+    materialMenu,
+    experienceDiscuss,
+    coursewareSharing,
 }

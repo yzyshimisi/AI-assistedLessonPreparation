@@ -1,7 +1,7 @@
 <template>
 <div class="h-screen w-screen bg-base-200 flex gap-1">
   <myMenu></myMenu>
-  <div class="card bg-base-100 w-[30%] h-[500px] shadow-xl ml-[100px] mt-[50px]">
+  <div class="card bg-base-100 w-[35%] h-[500px] shadow-xl ml-[100px] mt-[50px]">
     <div class="card-body">
       <div class="flex items-center">
         <div class="flex flex-col">
@@ -14,23 +14,32 @@
             <img :src="imgBase64 ? imgBase64 : userInfo.avatar" class="avatar size-20 rounded-full" />
           </el-upload>
         </div>
-        <div class="text-lg ml-8"><dClickEdit @overModify="overModify" :data="userInfo['username']"></dClickEdit></div>
+        <div class="text-lg ml-8"><dClickEdit @overModify="overModify" :data="userInfo['username'] ? userInfo['username'] : '未设定'"></dClickEdit></div>
       </div>
       <div class="overflow-x-auto mt-4">
         <table class="table text-lg">
           <tbody>
-          <!-- row 1 -->
           <tr>
             <td>邮箱</td>
             <td>{{userInfo.email}}</td>
           </tr>
-          <!-- row 2 -->
           <tr>
             <td>用户注册时间</td>
             <td>{{userInfo.created_at}}</td>
           </tr>
+          <tr>
+            <td>AI陪伴助手角色切换</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>主题色切换</td>
+            <td></td>
+          </tr>
           </tbody>
         </table>
+      </div>
+      <div class="text-center">
+        <button class="btn bg-[#65558f] text-white hover:bg-purple-900 px-8 rounded-3xl">退出登录</button>
       </div>
     </div>
   </div>

@@ -8,6 +8,7 @@
     <div class="absolute bottom-[50px] w-[155px] flex flex-col gap-2">
       <div style="border-bottom: 1px solid #000000;" class="w-[155px]"></div>
       <li @click="openMyCollection" onclick="myCollectionDia.showModal()"><a><el-icon><Star /></el-icon>我的收藏</a></li>
+      <li><a><el-icon><Share /></el-icon>分享链接</a></li>
       <li @click="openRecycleBin" onclick="recycleBinDia.showModal()"><a><el-icon><Delete /></el-icon>回收站</a></li>
       <div style="border-bottom: 1px solid #000000;" class="w-[155px]"></div>
     </div>
@@ -182,7 +183,11 @@
 </dialog>
 <recycleBinDia :isOpen="isOpenRecycleBin" @restoreFile="restoreFile"></recycleBinDia>
 <myCollectionDia></myCollectionDia>
-<shareLinkDia></shareLinkDia>
+<shareLinkDia
+    :fileList="fileList"
+    :selectedFilesInd="selectedFilesInd"
+>
+</shareLinkDia>
 </template>
 
 <script setup lang="ts">
@@ -198,7 +203,6 @@ const avatarUrls = [
   "https://randomuser.me/api/portraits/men/1.jpg",
   "https://randomuser.me/api/portraits/men/2.jpg",
   "https://randomuser.me/api/portraits/lego/1.jpg",
-  "https://i.pravatar.cc/200",
   "https://robohash.org/test2",
   "https://robohash.org/test3"
 ];
@@ -238,7 +242,7 @@ const fileInfoList = reactive([]);
 interface Path{
   [key: string] : number;
 }
-const nowPath = reactive<Path[]>([{'Home': 0},])
+const nowPath = ref<Array<Path>>([{'Home': 0},])
 
 const pageInfo = reactive({
   page_num: 1,
@@ -259,10 +263,10 @@ watch(()=>isShowMenu.value,(newValue,oldValue)=>{
   }
 })
 
-const searchKeyWord = ref<string>('');
+const searchKeyWord = ref<string|null>('');
 
 watch(()=>searchKeyWord.value,(newValue,oldValue)=>{
-  searchFile();
+  run()
 })
 
 const selectMask = ref<HTMLElement | null>(null)
@@ -274,7 +278,6 @@ const selectMaskOldPos = ref({
 
 onMounted(()=>{
   getFileList();
-  console.log(fileList.value)
 })
 
 const startDragSelect = (event) => {  // 按下鼠标，开始拖动多选
@@ -377,17 +380,31 @@ const getFileIconInd = (type) => {
   switch (type){
     case "文件夹":
       return 0
-      break
-    case 'png文件':
+
+    case "png文件":
       return 4
-      break
+
+    case "xlsx文件":
+    case "xls文件":
+      return 3
+
+    case "pptx文件":
+    case "ppt文件":
+      return 2
+
+    case "docx文件":
+    case "doc文件":
+      return 1
+
+    case "mp4文件":
+      return 5
   }
 }
 
 const getFileList = () => {
   if(filterCho.value === 0){
     useRequest(()=>getFileListAPI({
-      parent_id: Object.values(nowPath[nowPath.length-1])[0],
+      parent_id: Object.values(nowPath.value[nowPath.value.length-1])[0],
       page_num: pageInfo['page_num'],
       page_size: pageInfo['page_size']
     }),{
@@ -497,14 +514,14 @@ const endRenaming = (newName) => {
 const createDir = async () => {
   let path = ''
   path.concat('/')
-  for(let i=1;i<nowPath.length;i++){
-    path.concat(Object.keys(nowPath[i])[0]).concat('/')
+  for(let i=1;i<nowPath.value.length;i++){
+    path.concat(Object.keys(nowPath.value[i])[0]).concat('/')
   }
   path.concat('新建文件夹')
   useRequest(()=>createDirectoryAPI({
     name: "新建文件夹",
     path: path,
-    parent_id: Object.values(nowPath[nowPath.length-1])[0],
+    parent_id: Object.values(nowPath.value[nowPath.value.length-1])[0],
   }),{
     onSuccess: async (res) => {
       if(res['code']===200){
@@ -571,8 +588,8 @@ const getFileInfo = () => {
 const uploadInput = ref<UploadInstance>(null)
 const uploadFile = (uploadFile,uploadFiles) => {
   let path = '/'
-  for(let i=1;i<nowPath.length;i++){
-    path = path.concat(Object.keys(nowPath[i])[0]).concat('/')
+  for(let i=1;i<nowPath.value.length;i++){
+    path = path.concat(Object.keys(nowPath.value[i])[0]).concat('/')
   }
 
   let file = uploadFile.raw
@@ -581,7 +598,7 @@ const uploadFile = (uploadFile,uploadFiles) => {
 
   let formData = new FormData();
 
-  formData.append('parent_id',Object.values(nowPath[nowPath.length-1])[0].toString())
+  formData.append('parent_id',Object.values(nowPath.value[nowPath.value.length-1])[0].toString())
   formData.append('path',path)
   formData.append("file",file)
 
@@ -611,14 +628,20 @@ const changeDirectory = (ind) => {
 
     let pathNode = {}
     pathNode[fileList.value[ind]['name']] = fileList.value[ind]['id']
-    nowPath.push(pathNode)
+    nowPath.value.push(pathNode)
     getFileList();
   }
 }
 
 const backToDirectory = (ind) => {
-  nowPath.splice(ind+1,nowPath.length)
-  getFileList();
+  if(Object.keys(nowPath.value[ind])[0]==='Search' && nowPath.value[ind][Object.keys(nowPath.value[ind])[0]] === 0){
+    nowPath.value = [{"Home":0}]
+    getFileList();
+    searchKeyWord.value = ''
+  }else{
+    nowPath.value.splice(ind+1,nowPath.value.length)
+    getFileList();
+  }
 }
 
 const collectFile = () => {
@@ -689,17 +712,24 @@ const handleDrop = (event,ind) => {   // 释放拖动的文件
   selectedFilesInd.value = []
 }
 
-const searchFile = () => {
-  useRequest(()=>searchFileAPI(searchKeyWord.value),{
-    onSuccess(res){
-      if(res['code']===200){
-        console.log(res)
+const { data, run } = useRequest(()=>searchFileAPI(searchKeyWord.value),{
+  debounceWait: 500,
+  manual: true,
+  onSuccess(res){
+    if(res['code']===200){
+      if(searchKeyWord.value!==''){       // 判断是清空搜索，还是搜索内容
+        nowPath.value = [{'Search': 0}]
       }else{
-        console.log(res)
+        nowPath.value = [{'Home': 0}]
       }
+      if(fileList.value.toString() !== res['data'].toString()){
+        fileList.value = res['data']  // 防止通过点击路径栏返回Home时，页面多闪一下
+      }
+    }else{
+      ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
     }
-  })
-}
+  }
+})
 
 const openRecycleBin = () => {
   isOpenRecycleBin.value = true
