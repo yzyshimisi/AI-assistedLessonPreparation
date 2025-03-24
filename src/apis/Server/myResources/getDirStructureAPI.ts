@@ -2,15 +2,14 @@ import { request } from "../../request";
 
 const token = localStorage.getItem('token')
 
-const getResourcesListAPI = async (query:{
-    resource_type: number,
-    subject_name: string,
+const getDirStructureAPI = async (query:{
+    parent_id: number
 }) => {
-    let url = `/api/share/resource?resource_type=${query.resource_type}&subject_name=${query.subject_name}`
+    let url = `/api/disk/directory_structure?parent_id=${query.parent_id}`
     return request(url,{
         method: "get",
         headers: {"Content-Type":"application/json", 'Authorization':`Bearer ${token}`},
     })
 }
 
-export default getResourcesListAPI;
+export default getDirStructureAPI;

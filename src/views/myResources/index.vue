@@ -1,10 +1,19 @@
 <template>
 <div class="h-screen w-screen bg-base-200 flex gap-1">
   <myMenu></myMenu>
-  <ul class="menu rounded-box w-[170px] h-full bg-base-100 relative text-base">
-    <li><a>Item 1</a></li>
-    <li><a>Item 2</a></li>
-    <li><a>Item 3</a></li>
+  <ul class="menu rounded-box w-[180px] h-full bg-base-100 relative text-base">
+    <ul class="menu rounded-box text-base">
+      <li>    <!-- 目录区域 -->
+        <details open>
+          <summary>{{ Object.keys(nowPath[nowPath.length-1])[0] }}</summary>
+          <ul>
+            <li v-for="(value,index) in dirStructure">
+              <a @click="changeDirectory_2(value)"><img :src="fileIcon[0]" class="w-[25px]">{{ value['name'] }}</a>
+            </li>
+          </ul>
+        </details>
+      </li>
+    </ul>
     <div class="absolute bottom-[50px] w-[155px] flex flex-col gap-2">
       <div style="border-bottom: 1px solid #000000;" class="w-[155px]"></div>
       <li @click="openMyCollection" onclick="myCollectionDia.showModal()"><a><el-icon><Star /></el-icon>我的收藏</a></li>
@@ -70,9 +79,9 @@
         <div><img src='/myResources/multiChoice/multiCho.png'></div>
         <span>已选 {{selectedFileNum}} 项</span>
         <div class="bg-violet-200 flex items-center gap-2 text-sm rounded-2xl p-2">
-          <div class="flex items-center gap-1 p-1 hover:bg-base-200 hover:cursor-pointer"><el-icon size="20"><Folder /></el-icon><span>移动</span></div>
+          <div @click="openMoveFileDia" class="flex items-center gap-1 p-1 hover:bg-base-200 hover:cursor-pointer"><el-icon size="20"><Folder /></el-icon><span>移动</span></div>
           <div @click="deleteFile" class="flex items-center gap-1 p-1 hover:bg-base-200 hover:cursor-pointer"><el-icon size="20"><Delete /></el-icon><span>删除</span></div>
-          <div class="flex items-center gap-1 p-1 hover:bg-base-200 hover:cursor-pointer"><el-icon size="20"><Download /></el-icon><span>下载</span></div>
+          <div @click="downloadFile" class="flex items-center gap-1 p-1 hover:bg-base-200 hover:cursor-pointer"><el-icon size="20"><Download /></el-icon><span>下载</span></div>
           <div @click="collectFile" class="flex items-center gap-1 p-1 hover:bg-base-200 hover:cursor-pointer"><el-icon size="20"><Star /></el-icon><span>收藏</span></div>
           <div class="flex items-center gap-1 p-1 hover:bg-base-200 hover:cursor-pointer"><el-icon size="20"><Warning /></el-icon><span>举报</span></div>
         </div>
@@ -137,17 +146,18 @@
     </div>
   </div>
 </div>
+<!-- 右键菜单 -->
 <ul
     class="menu bg-base-300 rounded-box fixed"
     :class="isShowMenu ? '' : 'invisible'"
     :style="{left:menuPos.left+'px',top:menuPos.top+'px'}"
 >
   <li @click="changeDirectory(selectedFilesInd[0])"><a>打开</a></li>
-  <li><a>下载</a></li>
+  <li @click="downloadFile"><a>下载</a></li>
   <li onclick="shareLinkDia.showModal()"><a>分享</a></li>
   <div style="border-bottom: 1px solid #000000;" class="w-full my-1"></div>
   <li v-show="selectedFilesInd.length === 1" @click="rename"><a>重命名</a></li>
-  <li><a>移动到</a></li>
+  <li @click="openMoveFileDia"><a>移动到</a></li>
   <li @click="getFileInfo" onclick="fileInfoDia.showModal()"><a>详细信息</a></li>
   <div style="border-bottom: 1px solid #000000;" class="w-full my-1"></div>
   <li @click="deleteFile"><a>删除</a></li>
@@ -188,15 +198,54 @@
     :selectedFilesInd="selectedFilesInd"
 >
 </shareLinkDia>
+<dialog id="moveFileDia" class="modal">      <!-- 移动文件对话框 -->
+  <div class="modal-box">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    <h3 class="text-lg font-bold">移动文件</h3>
+    <div class="mt-4 flex flex-col gap-4">
+      <label class="input input-bordered flex items-center gap-2">
+        <input v-model="moveFilePath" type="text" class="grow" placeholder="直接输入绝对路径" />
+        <el-icon><Search /></el-icon>
+      </label>
+      <ul class="menu rounded-box w-56 text-base">
+        <li>
+          <a @click="moveFileBack" class="relative">
+            {{ Object.keys(moveFileNow)[0] }}
+            <div class="absolute right-[20px]">
+              <el-icon><Back /></el-icon>
+            </div>
+          </a>
+          <ul>
+            <li
+                v-for="(value,index) in moveFileDirStruct"
+                @dblclick="moveFileEnterDir(value)"
+                @click="moveFileSelectId=value['id']"
+            >
+              <a :class="moveFileSelectId === value['id'] ? 'bg-base-300' : ''"><img :src="fileIcon[0]" class="w-[25px]">{{ value['name'] }}</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <div class="text-center">
+        <button @click="moveFileDiaMove" class="btn btn-active px-16">移动</button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, inject } from "vue";
 import { useRequest } from "vue-hooks-plus";
-import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, filterFileTypeAPI } from "../../apis"
-import { ElNotification } from 'element-plus'
+import { request } from "../../apis/request";
+import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, filterFileTypeAPI, getDirStructureAPI } from "../../apis"
+import { ElNotification, ElMessage } from 'element-plus'
 import { displayFile, myMenu, recycleBinDia, myCollectionDia, shareLinkDia } from "../../components"
-import { ElMessage } from 'element-plus'
 import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 
 const avatarUrls = [
@@ -242,7 +291,14 @@ const fileInfoList = reactive([]);
 interface Path{
   [key: string] : number;
 }
-const nowPath = ref<Array<Path>>([{'Home': 0},])
+const nowPath = ref<Array<Path>>([{'Home': 0},])    // 当前的绝对路径
+
+watch(()=>nowPath.value,()=>{
+  if(nowPath.value.length){
+    dirStructure.value = []
+    getDirStructure(nowPath.value[nowPath.value.length-1][Object.keys(nowPath.value[nowPath.value.length-1])[0]],dirStructure);
+  }
+},{deep:true})
 
 const pageInfo = reactive({
   page_num: 1,
@@ -250,7 +306,7 @@ const pageInfo = reactive({
   total_num: -1,
 })
 
-const renameFileInd = ref<number>(-1);
+const renameFileInd = ref<number>(-1);      // 要修改文件名的文件索引
 
 const isShowMenu = ref<boolean>(false);
 const menuPos = reactive({left:0,top:0});
@@ -263,21 +319,30 @@ watch(()=>isShowMenu.value,(newValue,oldValue)=>{
   }
 })
 
-const searchKeyWord = ref<string|null>('');
+const searchKeyWord = ref<string|null>('');     // 搜索文件关键字
 
 watch(()=>searchKeyWord.value,(newValue,oldValue)=>{
   run()
 })
 
-const selectMask = ref<HTMLElement | null>(null)
+const selectMask = ref<HTMLElement | null>(null)    // 拖动选择文件的框
 const isStartSelect =  ref<boolean>(false)
 const selectMaskOldPos = ref({
   oldLeft: 0,
   oldTop: 0,
 })
 
+const dirStructure = ref<Array<object>>([])     // 在目录区显示目录结构的
+
+const moveFileOlds = ref<Array<object>>([])   // 用于返回上级目录
+const moveFileNow = ref<object>({'Home':0})    // 搜索文件对话框中的当前目录
+const moveFileDirStruct = ref<Array<object>>([])    // 搜索文件对话框中的目录结构
+const moveFileSelectId = ref<number>(0)
+const moveFilePath = ref<string>('')      // 支持直接输入路径进行移动
+
 onMounted(()=>{
   getFileList();
+  getDirStructure(0,dirStructure)
 })
 
 const startDragSelect = (event) => {  // 按下鼠标，开始拖动多选
@@ -410,6 +475,8 @@ const getFileList = () => {
     }),{
       onBefore(){
         fileList.value = []
+        selectedFileNum.value = 0
+        selectedFilesInd.value = []
       },
       onSuccess(res){
         if(res['code']===200){
@@ -481,6 +548,18 @@ const openMenu = (event,ind) => {
 const closeMenu = () => {
   isShowMenu.value = false
   window.removeEventListener('scroll', closeMenu);
+}
+
+const getDirStructure = (parent_id,purDic) => {
+  useRequest(()=>getDirStructureAPI({parent_id: parent_id}),{
+    onSuccess(res){
+      if(res['code']===200){
+        purDic.value = res['data']
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
 }
 
 const rename = () => {
@@ -691,6 +770,9 @@ const handleDrop = (event,ind) => {   // 释放拖动的文件
   event.preventDefault();
   const sourceInd = event.dataTransfer.getData('index')
 
+  if(fileList.value[ind]['file_type'] !== '文件夹'){
+    return
+  }
   let parent_id = fileList.value[ind]['id']
   let ids = []
 
@@ -710,6 +792,7 @@ const handleDrop = (event,ind) => {   // 释放拖动的文件
 
   moveFile(ids,parent_id)
   selectedFilesInd.value = []
+  selectedFileNum.value = 0
 }
 
 const { data, run } = useRequest(()=>searchFileAPI(searchKeyWord.value),{
@@ -741,8 +824,105 @@ const openRecycleBin = () => {
 const restoreFile = () => {
   getFileList()
 }
+
+const changeDirectory_2 = (value) => {    // 目录区域的切换
+  for(let i=0; i<fileList.value.length; i++){
+    if(fileList.value[i]['id']===value['id']){
+      changeDirectory(i);
+      break
+    }
+  }
+}
+
+const openMoveFileDia = () => {
+  if(selectedFilesInd.value.length === 0){
+    ElMessage({message: '请先选择至少一个文件！', type: 'warning',})
+    return
+  }
+  moveFileSelectId.value = 0
+  moveFileOlds.value = [];
+  moveFileNow.value = {'Home':0}
+  getDirStructure(0,moveFileDirStruct)
+  moveFileDia.showModal()
+}
+
+const moveFileEnterDir = (value) => {
+  let obj = {}
+  moveFileOlds.value.push(moveFileNow.value)
+
+  obj[value['name']] = value['id']
+  moveFileNow.value = obj
+  getDirStructure(value['id'],moveFileDirStruct)
+}
+
+const moveFileBack = () => {
+  if(moveFileOlds.value.length > 0){
+    moveFileNow.value = moveFileOlds.value[moveFileOlds.value.length-1]
+    moveFileSelectId.value = moveFileNow.value[Object.keys(moveFileNow.value)[0]]
+    moveFileOlds.value = moveFileOlds.value.splice(0,moveFileOlds.value.length-1)
+    getDirStructure(moveFileNow.value[Object.keys(moveFileNow.value)[0]],moveFileDirStruct)
+  }
+}
+
+const moveFileDiaMove = () => {     // 移动文件对话框中，实现移动文件
+  let ids = []
+  for(let i=0; i<selectedFileNum.value; i++){
+    ids.push(fileList.value[selectedFilesInd.value[i]]['id'])
+  }
+  moveFile(ids,moveFileSelectId.value);
+  selectedFilesInd.value = []
+  selectedFileNum.value = 0
+  moveFileDia.close()
+}
+
+const downloadFile = () => {    // 下载文件
+  for(let i=0; i<selectedFileNum.value; i++){
+    if(fileList.value[selectedFilesInd.value[i]]['file_url']){
+      let fileUrl = fileList.value[selectedFilesInd.value[i]]['file_url']  // 文件URL地址
+      let fileName = fileList.value[selectedFilesInd.value[i]]['name'] // 文件名
+      let extName =  fileUrl.substring( fileUrl.lastIndexOf(".") ); // 后缀名
+
+      let type = fileList.value[selectedFilesInd.value[i]]['file_type']
+       // 下载图片需要封装URL
+      if(type.includes('png') || type.includes('webp') ||
+          type.includes('jpg') || type.includes('jpeg') ||
+          type.includes('mp4')
+      ){
+        request(fileUrl,{
+         method: "get",
+         responseType: 'blob',
+       }).then((res)=>{
+         fileUrl = URL.createObjectURL(<Blob>res)
+
+         let link = document.createElement('a');
+         link.download = fileName  // 指定下载文件的名称
+         link.href = fileUrl;
+         link.target = "_blank"
+         link.style.display = "none"          // 这个元素不用呈现在页面上，隐藏掉。
+
+         document.body.appendChild( link );
+         link.click();
+
+         URL.revokeObjectURL(fileUrl)
+         document.body.removeChild( link );   // 防止多次下载
+       })
+     }else{
+       let link = document.createElement('a');
+       link.download = fileName;  // 指定下载文件的名称
+       link.href = fileUrl;
+       link.target = "_blank"
+       link.style.display = "none"          // 这个元素不用呈现在页面上，隐藏掉。
+
+       document.body.appendChild( link );
+       link.click();
+
+       URL.revokeObjectURL(fileUrl)
+       document.body.removeChild( link );   // 防止多次下载
+     }
+    }
+  }
+}
 </script>
 
 <style scoped>
-
 </style>

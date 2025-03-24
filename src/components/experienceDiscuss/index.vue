@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import {onMounted, ref, watch} from "vue";
 import { useMainStore } from "../../stores";
-import { publishResourcesAPI, getResourcesListAPI, searchResourcesAPI } from "../../apis";
+import { publishResourcesAPI, getResourcesListAPI, searchResourcesAPI, getSubjectListAPI } from "../../apis";
 import { useRequest } from "vue-hooks-plus";
 import { ElMessage, ElNotification } from "element-plus";
 
@@ -94,8 +94,11 @@ watch(()=>searchExperienceKey.value,()=>{
   run()
 })
 
+const subjectList = ref<Array<string>>([])
+
 onMounted(()=>{
   getResourcesList()
+  getSubjectList()
 })
 
 const getResourcesList = () => {
@@ -142,6 +145,18 @@ const { data, run } = useRequest(()=>searchResourcesAPI({resource_type:1,keyword
 
 const viewDetails = (ind) => {
   viewExperienceDetailsInd.value = ind
+}
+
+const getSubjectList = () => {
+  useRequest(()=>getSubjectListAPI(),{
+    onSuccess(res){
+      if(res['code']===200){
+        subjectList.value = res['data']
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
 }
 </script>
 

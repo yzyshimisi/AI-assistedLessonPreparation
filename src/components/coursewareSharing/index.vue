@@ -10,7 +10,7 @@
           </label>
           <button @click="isShowPublishCoursewareForm=true" class="btn bg-[#e5dbf5] text-[#67578f] hover:bg-[#e5dbf5]">上传我的课件</button>
         </div>
-        <div class="grid grid-cols-2 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[680px] w-[1060px]">
+        <div class="grid grid-cols-2 gap-y-4 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[680px] w-[1060px]">
           <div
               v-for="(value,index) in coursewareResourceList"
               class="bg-white p-4 w-[500px] relative"
@@ -25,7 +25,7 @@
               <p class="absolute left-[40%] font-bold text-2xl">{{ value['title'] }}</p>
               <div @click="viewDetails(index)" class="absolute right-[40px]"><button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
             </div>
-            <p class="mt-4 max-h-[92px] text-ellipsis overflow-hidden">{{ value['cover_img'] }}</p>
+            <img :src="value['cover_img']" class="mt-4">
           </div>
         </div>
       </div>
@@ -72,6 +72,22 @@
               <div class="el-upload__text flex flex-col gap-2">
                 <span class="text-xl font-bold">点击或拖拽文件上传</span>
                 <span>上传课件PPT，文档大小最多不超过20.00M</span>
+              </div>
+            </el-upload>
+            <p class="ml-12">课件封面</p>
+            <el-upload
+                ref="coursewareCoverUpload"
+                :on-change="coursewareCoverFileChange"
+                :on-exceed="coursewareCoverFileExceed"
+                class="upload-demo"
+                drag
+                :auto-upload="false"
+                :limit="1"
+            >
+              <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+              <div class="el-upload__text flex flex-col gap-2">
+                <span class="text-xl font-bold">点击或拖拽文件上传</span>
+                <span>上传课件封面，默认不传则为PPT首页</span>
               </div>
             </el-upload>
           </div>
@@ -124,6 +140,19 @@ const coursewareFileExceed: UploadProps['onExceed'] = (files) => {
   coursewareUpload.value!.handleStart(file)
 }
 
+const coursewareCoverUpload = ref<UploadInstance>()
+const coursewareCoverFile = ref<File | null>(null)
+
+const coursewareCoverFileChange = (uploadFile,uploadFiles) => {
+  coursewareCoverFile.value = uploadFile.raw
+}
+const coursewareCoverFileExceed: UploadProps['onExceed'] = (files) => {
+  coursewareCoverUpload.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  coursewareCoverUpload.value!.handleStart(file)
+}
+
 onMounted(()=>{
   getResourcesList()
 })
@@ -146,6 +175,16 @@ const publishCourseware = () => {
     onSuccess(res){
       if(res['code']===200){
         publishCoursewareFormData.value.content = res['data']['url']
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
+
+  useRequest(()=>resourceFileUploadAPI({file:coursewareCoverFile.value}),{
+    onSuccess(res){
+      if(res['code']===200){
+        publishCoursewareFormData.value.cover_img = res['data']['url']
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }

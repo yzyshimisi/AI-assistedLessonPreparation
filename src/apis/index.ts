@@ -57,6 +57,8 @@ import sendMsgAPI from "./Server/chat/sendMsgAPI";
 import lessonPlanUploadAPI from "./Server/lessonPlanDesign/lessonPlanUploadAPI";
 import createLessonPlanAPI from "./Server/lessonPlanDesign/createLessonPlanAPI";
 import resourceFileUploadAPI from "./Server/sourceMaterial/resourceFileUploadAPI";
+import getDirStructureAPI from "./Server/myResources/getDirStructureAPI";
+import getSubjectListAPI from "./Server/sourceMaterial/getSubjectListAPI";
 
 export {
     loginAPI,
@@ -118,4 +120,6 @@ export {
     lessonPlanUploadAPI,
     createLessonPlanAPI,
     resourceFileUploadAPI,
+    getDirStructureAPI,
+    getSubjectListAPI,
 }
