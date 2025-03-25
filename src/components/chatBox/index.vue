@@ -1,5 +1,5 @@
 <template>
-<div class="fixed bottom-[20px] mt-5" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
+<div id="container" class="fixed bottom-[20px] mt-5" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
   <div
       id="chatBox"
       class="overflow-y-scroll bg-base-300 px-5 py-8"
@@ -56,9 +56,7 @@ const resMsg = ref<string>('')    // 用于实现打字效果
 
 const isWaitingRes = ref<boolean>(false)
 
-
 const props = defineProps(['id','isOpenFuncForm','isWaitRes','lessonPlanRes']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
-
 
 watch([()=>props.isWaitRes],()=>{
   if(props.isWaitRes === true){
@@ -95,7 +93,6 @@ const windowScrollY = ref<number>(-1);
 const oldScrollY = ref<number>(-1);
 
 watch(()=>windowScrollY.value,()=>{
-
   let chatBox = document.getElementById('chatBox')
   let scrollH = windowScrollY.value <= 145 ?  windowScrollY.value : 145
 
@@ -104,6 +101,9 @@ watch(()=>windowScrollY.value,()=>{
 })
 
 onMounted(()=>{
+  let container = document.getElementById('container')
+  console.log(container.offsetHeight)
+  console.log(chatBoxHeight.value)
   nextTick(()=>{
     handleScroll()
   })

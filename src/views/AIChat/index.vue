@@ -45,7 +45,7 @@
   </div>
   <div v-if="nowTopicInd === -1 && nowFuncForms === -1" class="flex absolute bottom-0 left-[200px]">
     <div>
-      <img src="/aichat/aiPerson.png">
+      <img :src="assistantRoleSrc" class="w-[350px]">
     </div>
     <div class="chat chat-start">
       <div class="chat-bubble bg-base-100 text-base-content max-w-96">你好！这里是教小帮，请选择会话记录或新建会话</div>
@@ -60,7 +60,7 @@
     ></chatBox>
   </div>
 </div>
-<dialog id="topicInfo" class="modal">
+<dialog id="topicInfo" class="modal">     <!-- 会话信息对话框 -->
   <div class="modal-box">
     <div class="overflow-x-auto">
       <table class="table text-base">
@@ -94,7 +94,7 @@
     <button id="closeDialog">close</button>
   </form>
 </dialog>
-<dialog id="addTopic" class="modal">
+<dialog id="addTopic" class="modal">    <!-- 添加会话对话框 -->
   <div class="modal-box">
     <div class="flex">
       <input v-model="newTopicTitle" @keyup.enter="createTopic" type="text" placeholder="The title of the topic" class="input input-bordered w-full max-w-xs" />
@@ -108,7 +108,7 @@
     <button>close</button>
   </form>
 </dialog>
-<dialog id="searchTopic" class="modal">
+<dialog id="searchTopic" class="modal">     <!-- 搜索对话框 -->
   <div class="modal-box">
     <div class="flex">
       <input v-model="searchTopicKey" type="text" placeholder="The title of the topic" class="input input-bordered w-full max-w-xs" />
@@ -146,6 +146,8 @@ import { deleteTopicAPI, modifyTitleAPI, createTopicAPI, searchTopicAPI } from "
 import router from "../../router";
 import { useRoute } from "vue-router";
 import { chatBox, dClickEdit, lessonPlanDesign } from "../../components";
+import { getAssistantRoleSrc } from "../../themes"
+import assistantRole from "../../themes/assistantRole";
 
 const topicList = ref([]);
 const isShowChoIcon = ref<Array<boolean>>([]);
@@ -177,8 +179,11 @@ watch(()=>searchTopicKey.value,()=>{
 const isWaitRes = ref<boolean>(false);    // 用来在教案生成与聊天框组件中的数据传递
 const lessonPlanRes = ref<string>('');
 
+const assistantRoleSrc= ref<string>('');
+
 onMounted(()=>{
   getTopicList()
+  assistantRoleSrc.value = getAssistantRoleSrc()
 })
 
 const showChoIcon = (ind) => {
@@ -312,7 +317,9 @@ const createTopic = () => {
 
 const chooseSearchTopic = (ind) => {
   for(let i=0; i<topicList.value.length; i++){
-    // if(topicList.value[i][''])
+    if(topicList.value[i]['id'] === searchResult.value[ind]['session_id']){
+      chooseTopic(i)
+    }
   }
 }
 

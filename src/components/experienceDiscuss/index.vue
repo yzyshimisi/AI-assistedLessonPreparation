@@ -37,6 +37,10 @@
           </div>
           <p class="mt-4 max-h-[92px] text-ellipsis overflow-hidden">{{ value['content'] }}</p>
         </div>
+        <!-- 助手角色 -->
+        <div v-show="choSubjectInd === -1 || !experienceResourceList" class="fixed bottom-[30px]">
+          <img :src="assistantRoleSrc" class="w-[350px]">
+        </div>
       </div>
     </div>
     <div v-if="viewExperienceDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">     <!-- 详情显示 -->
@@ -82,11 +86,12 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useMainStore } from "../../stores";
 import { publishResourcesAPI, getResourcesListAPI, searchResourcesAPI, getSubjectListAPI } from "../../apis";
 import { useRequest } from "vue-hooks-plus";
 import { ElMessage, ElNotification } from "element-plus";
+import { getAssistantRoleSrc } from "../../themes"
 
 const userInfo = useMainStore().userInfoStore().userInfo
 
@@ -117,8 +122,11 @@ watch(()=>choSubjectInd.value,()=>{
   getResourcesList()
 })
 
+const assistantRoleSrc = ref<string>('')
+
 onMounted(()=>{
   getSubjectList()
+  assistantRoleSrc.value = getAssistantRoleSrc()
 })
 
 const getResourcesList = () => {

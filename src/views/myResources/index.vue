@@ -866,8 +866,10 @@ const moveFileBack = () => {
 
 const moveFileDiaMove = () => {     // 移动文件对话框中，实现移动文件
   let ids = []
+
   for(let i=0; i<selectedFileNum.value; i++){
-    ids.push(fileList.value[selectedFilesInd.value[i]]['id'])
+    if(fileList.value[selectedFilesInd.value[i]]['id'] !== moveFileSelectId.value)
+      ids.push(fileList.value[selectedFilesInd.value[i]]['id'])
   }
   moveFile(ids,moveFileSelectId.value);
   selectedFilesInd.value = []

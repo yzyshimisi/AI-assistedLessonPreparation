@@ -24,7 +24,7 @@
           <path
               d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
         </svg>
-        <input v-model="email" type="text" class="grow" placeholder="Email" />
+        <input @keydown.enter="login" v-model="email" type="text" class="grow" placeholder="Email" />
       </label>
       <label class="input input-bordered flex items-center gap-2 mt-4">
         <svg
@@ -37,7 +37,7 @@
               d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
               clip-rule="evenodd" />
         </svg>
-        <input v-model="password" type="password" class="grow" placeholder="Password" />
+        <input @keydown.enter="login" v-model="password" type="password" class="grow" placeholder="Password" />
       </label>
       <div class="mt-3">
         <router-link to="/login/findPassword" class="text-sm text-blue-700 cursor-pointer hover:underline">忘记密码？</router-link>
@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import {ref, watch} from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { loginAPI, getUserInfoAPI } from "../../apis"
 import { ElNotification } from 'element-plus'
@@ -73,14 +73,16 @@ const login = () => {
   useRequest(()=>loginAPI({"email":email.value, "password":password.value}),{
     onSuccess(res){
       if(res['code'] === 200){
-        ElNotification({title: 'Success', message: res['msg'], type: 'success',})
-
         localStorage.setItem("token",res['data']['token']);
         loginstore.setLogin(true);
 
-        getUserInfo();  // 获取用户信息
+        setTimeout(()=>{
+          getUserInfo();  // 获取用户信息
 
-        router.push("/");
+          router.push("/chat");
+
+          ElNotification({title: 'Success', message: '登录成功', type: 'success',})
+        },0)
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }

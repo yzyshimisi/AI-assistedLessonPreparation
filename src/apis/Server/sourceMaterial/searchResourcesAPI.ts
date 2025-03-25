@@ -7,7 +7,7 @@ const searchResourcesAPI = async (query:{
     keyword: string,
     subject_name: string,
 }) => {
-    let url = `/api/share/resource?resource_type=${query.resource_type}&keyword=${query.keyword}&subject_name=${query.subject_name}`
+    let url = `/api/share/search_resource?resource_type=${query.resource_type}&keyword=${query.keyword}&subject_name=${query.subject_name}`
     return request(url,{
         method: "get",
         headers: {"Content-Type":"application/json", 'Authorization':`Bearer ${token}`},

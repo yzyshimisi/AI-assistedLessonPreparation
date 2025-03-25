@@ -59,6 +59,7 @@ import createLessonPlanAPI from "./Server/lessonPlanDesign/createLessonPlanAPI";
 import resourceFileUploadAPI from "./Server/sourceMaterial/resourceFileUploadAPI";
 import getDirStructureAPI from "./Server/myResources/getDirStructureAPI";
 import getSubjectListAPI from "./Server/sourceMaterial/getSubjectListAPI";
+import oneClickTransferAPI from "./Server/sourceMaterial/oneClickTransferAPI";
 
 export {
     loginAPI,
@@ -122,4 +123,5 @@ export {
     resourceFileUploadAPI,
     getDirStructureAPI,
     getSubjectListAPI,
+    oneClickTransferAPI,
 }

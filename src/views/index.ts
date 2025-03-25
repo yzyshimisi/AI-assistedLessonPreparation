@@ -10,6 +10,7 @@ import lessonPreparationMaterials from "./lessonPreparationMaterials/index.vue";
 import classManagement from "./classManagement/index.vue";
 import classAcademic from "./classAcademic/index.vue";
 import sharedSpace from "./sharedSpace/index.vue";
+import advertisementPage from "./advertisementPage/index.vue";
 
 export {
     login,
@@ -24,4 +25,5 @@ export {
     classManagement,
     classAcademic,
     sharedSpace,
+    advertisementPage,
 }

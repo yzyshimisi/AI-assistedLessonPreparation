@@ -32,27 +32,37 @@
                 <img :src="value['avatar']" />
               </div>
             </div>
-            <p class="ml-4 font-bold">{{ value['username'] }}</p>
-            <p class="font-bold text-3xl ml-4 w-[200px] truncate">{{ value['title'] }}</p>
+            <p class="ml-4 font-bold text-sm">{{ value['username'] }}</p>
+            <p class="font-bold text-2xl ml-4 w-[200px] truncate">{{ value['title'] }}</p>
             <div @click="viewDetails(index)" class="absolute right-[20px]"><button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
           </div>
           <img :src="value['cover_img']" class="mt-4 max-h-[250px]">
         </div>
+      </div>
+      <!-- 助手角色 -->
+      <div v-show="choSubjectInd === -1 || !videoResourceList" class="fixed bottom-[30px]">
+        <img :src="assistantRoleSrc" class="w-[350px]">
       </div>
     </div>
     <div v-if="viewVideoDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">     <!-- 详情显示 -->
       <div class="bg-white p-5 w-[1000px] h-[830px] relative">
         <div class="flex items-center">
           <button @click="viewVideoDetailsInd=-1" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
-          <p class="absolute left-1/3 font-bold text-3xl">{{ videoResourceList[viewVideoDetailsInd]['title'] }}</p>
           <div class="flex flex-col font-bold absolute right-[30px]">
             <p class="text-sm">{{ videoResourceList[viewVideoDetailsInd]['username'] }}</p>
             <p class="text-sm">修改时间：{{ videoResourceList[viewVideoDetailsInd]['updated_at'].split(' ')[0] }}</p>
             <!--          <p class="text-sm">创建时间：{{ videoResourceList[viewVideoDetailsInd]['created_at'].split(' ')[0] }}</p>-->
           </div>
         </div>
-        <div class="mt-12 flex justify-center">
-          <video width="960" height="720" controls>
+        <div class="flex justify-center items-center mt-12 relative">
+          <p class="font-bold text-3xl">{{ videoResourceList[viewVideoDetailsInd]['title'] }}</p>
+          <div class="flex absolute right-0">
+            <button @click="oneClickTransfer" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键转存</button>
+            <button @click="oneClickDownload" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键下载</button>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-center">
+          <video width="864" height="648" controls>
             <source :src="videoResourceList[viewVideoDetailsInd]['content']" type="video/mp4">
             您的浏览器不支持 video 标签。
           </video>
@@ -120,15 +130,11 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import { useMainStore } from "../../stores";
-import {
-  publishResourcesAPI,
-  getResourcesListAPI,
-  searchResourcesAPI,
-  getSubjectListAPI,
-  resourceFileUploadAPI
-} from "../../apis";
+import { publishResourcesAPI, getResourcesListAPI, searchResourcesAPI, getSubjectListAPI, resourceFileUploadAPI, oneClickTransferAPI } from "../../apis";
 import { useRequest } from "vue-hooks-plus";
-import {ElMessage, ElNotification, genFileId, UploadInstance, UploadProps, UploadRawFile} from "element-plus";
+import { ElMessage, ElNotification, genFileId, UploadInstance, UploadProps, UploadRawFile } from "element-plus";
+import { getAssistantRoleSrc } from "../../themes";
+import { request } from "../../apis/request";
 
 const userInfo = useMainStore().userInfoStore().userInfo
 
@@ -185,8 +191,11 @@ const videoCoverFileExceed: UploadProps['onExceed'] = (files) => {
   videoCoverUpload.value!.handleStart(file)
 }
 
+const assistantRoleSrc = ref<string>('')
+
 onMounted(()=>{
   getSubjectList()
+  assistantRoleSrc.value = getAssistantRoleSrc()
 })
 
 const getResourcesList = () => {
@@ -299,6 +308,44 @@ const openPublishForm = () => {
     return
   }
   isShowPublishVideoForm.value = true
+}
+
+const oneClickTransfer = () => {
+  useRequest(()=>oneClickTransferAPI({
+    file_url: videoResourceList.value[viewVideoDetailsInd.value]['content'],
+    subject_name: subjectList.value[choSubjectInd.value]
+  }),{
+    onSuccess(res){
+      if(res['code']===200){
+        ElMessage({message: '转存成功', type: 'success',})
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
+}
+
+const oneClickDownload = () => {
+  let fileUrl // 文件URL地址
+
+  request(videoResourceList.value[viewVideoDetailsInd.value]['content'],{
+    method: "GET",
+    responseType: "blob",       //可以在下面用"new Blob()"替代
+  }).then((res)=>{
+    let fileUrl = URL.createObjectURL(<Blob>res)    //把res内容，转化成一个临时的链接
+    let fileName =  fileUrl.substring( fileUrl.lastIndexOf("/")+1 )  // 文件名
+
+    const link = document.createElement('a');
+    link.download = fileName;  // 指定下载文件的名称
+    link.href = fileUrl;
+    link.target = "_blank"
+    link.style.display = "none"          // 这个元素不用呈现在页面上，隐藏掉。
+
+    document.body.appendChild( link );
+    link.click();
+
+    document.body.removeChild( link );   // 防止多次下载
+  })
 }
 </script>
 

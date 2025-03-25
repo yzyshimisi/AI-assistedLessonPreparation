@@ -32,28 +32,50 @@
                   <img :src="value['avatar']" />
                 </div>
               </div>
-              <p class="ml-4 font-bold">{{ value['username'] }}</p>
-              <p class="font-bold text-3xl ml-4 w-[200px] truncate">{{ value['title'] }}</p>
+              <p class="ml-4 font-bold text-sm">{{ value['username'] }}</p>
+              <p class="font-bold text-2xl ml-4 w-[200px] truncate">{{ value['title'] }}</p>
               <div @click="viewDetails(index)" class="absolute right-[20px]"><button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
             </div>
             <img :src="value['cover_img']" class="mt-4 max-h-[250px]">
           </div>
+        </div>
+        <!-- 助手角色 -->
+        <div v-show="choSubjectInd === -1 || !coursewareResourceList" class="fixed bottom-[30px]">
+          <img :src="assistantRoleSrc" class="w-[350px]">
         </div>
       </div>
       <div v-if="viewCoursewareDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">     <!-- 详情显示 -->
         <div class="bg-white p-5 w-[1000px] h-[830px] relative">
           <div class="flex items-center">
             <button @click="viewCoursewareDetailsInd=-1" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
-            <p class="absolute left-1/3 font-bold text-3xl">{{ coursewareResourceList[viewCoursewareDetailsInd]['title'] }}</p>
             <div class="flex flex-col font-bold absolute right-[30px]">
               <p class="text-sm">{{ coursewareResourceList[viewCoursewareDetailsInd]['username'] }}</p>
               <p class="text-sm">修改时间：{{ coursewareResourceList[viewCoursewareDetailsInd]['updated_at'].split(' ')[0] }}</p>
               <!--          <p class="text-sm">创建时间：{{ coursewareResourceList[viewCoursewareDetailsInd]['created_at'].split(' ')[0] }}</p>-->
             </div>
           </div>
-          <p>{{ coursewareResourceList[viewCoursewareDetailsInd]['pdf_url'] }}</p>
-<!--          <p class="mt-8 h-[730px] overflow-y-auto" style="white-space: pre-wrap;">{{ coursewareResourceList[viewCoursewareDetailsInd]['content'] }}</p>-->
-<!--          <iframe :src="`/PPTXjs-1.21.1/index.html?file=` + coursewareResourceList[viewCoursewareDetailsInd]['content']" width="100%" height="800" frameborder="0"></iframe>-->
+          <!-- 预览PDF -->
+          <div class="mt-10 flex items-center justify-between">
+            <p class="font-bold text-xl">当前页码：第{{ pageNum }}页</p>
+            <p class="absolute w-full text-center font-bold text-3xl">{{ coursewareResourceList[viewCoursewareDetailsInd]['title'] }}</p>
+            <div class="flex flex-col">
+              <button @click="oneClickTransfer" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键转存</button>
+              <button @click="oneClickDownload" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键下载</button>
+            </div>
+          </div>
+          <div class="mt-8 flex gap-8 justify-center">
+            <div class="flex items-center">
+              <el-icon @click="prevPage" size="35" class="py-10 rounded-xl hover:bg-base-200 hover:cursor-pointer"><ArrowLeftBold /></el-icon>
+            </div>
+            <VuePdfEmbed
+                :source="coursewareResourceList[viewCoursewareDetailsInd]['pdf_url']"
+                :page="pageNum"
+                class="w-[800px]"
+            />
+            <div class="flex items-center">
+              <el-icon @click.prevent="nextPage" size="35" class="py-10 rounded-xl hover:bg-base-200 hover:cursor-pointer"><ArrowRightBold /></el-icon>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -116,17 +138,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, ref, watch} from "vue";
 import { useMainStore } from "../../stores";
-import {
-  publishResourcesAPI,
-  getResourcesListAPI,
-  searchResourcesAPI,
-  resourceFileUploadAPI,
-  getSubjectListAPI
-} from "../../apis";
+import { publishResourcesAPI, getResourcesListAPI, searchResourcesAPI, resourceFileUploadAPI, getSubjectListAPI, oneClickTransferAPI } from "../../apis";
 import { useRequest } from "vue-hooks-plus";
-import {ElMessage, ElNotification, genFileId, UploadInstance, UploadProps, UploadRawFile} from "element-plus";
+import { ElMessage, ElNotification, genFileId, UploadInstance, UploadProps, UploadRawFile } from "element-plus";
+import { getAssistantRoleSrc } from "../../themes";
+import VuePdfEmbed from 'vue-pdf-embed'
 
 const userInfo = useMainStore().userInfoStore().userInfo
 
@@ -157,21 +175,21 @@ watch(()=>choSubjectInd.value,()=>{
   getResourcesList()
 })
 
-const coursewareUpload = ref<UploadInstance>()
-const coursewareFile = ref<File | null>(null)
+const coursewareUpload = ref<UploadInstance>()        // 课件DOM元素
+const coursewareFile = ref<File | null>(null)   // 课件文件
 
-const coursewareFileChange = (uploadFile,uploadFiles) => {
+const coursewareFileChange = (uploadFile,uploadFiles) => {      // 处理文件上传
   coursewareFile.value = uploadFile.raw
 }
-const coursewareFileExceed: UploadProps['onExceed'] = (files) => {
+const coursewareFileExceed: UploadProps['onExceed'] = (files) => {    // 上传超过一个则覆盖
   coursewareUpload.value!.clearFiles()
   const file = files[0] as UploadRawFile
   file.uid = genFileId()
   coursewareUpload.value!.handleStart(file)
 }
 
-const coursewareCoverUpload = ref<UploadInstance>()
-const coursewareCoverFile = ref<File | null>(null)
+const coursewareCoverUpload = ref<UploadInstance>()   // 封面DOM元素
+const coursewareCoverFile = ref<File | null>(null)    // 封面文件
 
 const coursewareCoverFileChange = (uploadFile,uploadFiles) => {
   coursewareCoverFile.value = uploadFile.raw
@@ -183,8 +201,13 @@ const coursewareCoverFileExceed: UploadProps['onExceed'] = (files) => {
   coursewareCoverUpload.value!.handleStart(file)
 }
 
+const assistantRoleSrc = ref<string>('')    // 助手角色形象
+
+const pageNum = ref<number>(1)    // 浏览PDF的当前页面
+
 onMounted(()=>{
   getSubjectList()
+  assistantRoleSrc.value = getAssistantRoleSrc()
 })
 
 const getResourcesList = () => {
@@ -195,7 +218,6 @@ const getResourcesList = () => {
     onSuccess(res){
       if(res['code']===200){
         coursewareResourceList.value = res['data']
-        console.log(coursewareResourceList.value)
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
@@ -276,6 +298,7 @@ const { data, run } = useRequest(()=>searchResourcesAPI({
 })
 
 const viewDetails = (ind) => {
+  pageNum.value = 1
   viewCoursewareDetailsInd.value = ind
 }
 
@@ -297,6 +320,45 @@ const openPublishForm = () => {
     return
   }
   isShowPublishCoursewareForm.value = true
+}
+
+const oneClickTransfer = () => {
+  useRequest(()=>oneClickTransferAPI({
+    file_url: coursewareResourceList.value[viewCoursewareDetailsInd.value]['content'],
+    subject_name: subjectList.value[choSubjectInd.value]
+  }),{
+    onSuccess(res){
+      if(res['code']===200){
+        ElMessage({message: '转存成功', type: 'success',})
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
+}
+
+const oneClickDownload = () => {
+  let fileUrl =  coursewareResourceList.value[viewCoursewareDetailsInd.value]['content'] // 文件URL地址
+  let fileName =  fileUrl.substring( fileUrl.lastIndexOf("/")+1 )  // 文件名
+
+  const link = document.createElement('a');
+  link.download = fileName;  // 指定下载文件的名称
+  link.href = fileUrl;
+  link.target = "_blank"
+  link.style.display = "none"          // 这个元素不用呈现在页面上，隐藏掉。
+
+  document.body.appendChild( link );
+  link.click();
+
+  document.body.removeChild( link );   // 防止多次下载
+}
+
+const prevPage = () => {
+  if(pageNum.value>1) pageNum.value--
+}
+
+const nextPage = () => {
+  pageNum.value++
 }
 </script>
 

@@ -35,9 +35,15 @@ importers:
       vue-hooks-plus:
         specifier: ^2.2.1
         version: 2.2.1(vue@3.5.13(typescript@5.7.3))
+      vue-pdf-embed:
+        specifier: 1.2.1
+        version: 1.2.1(vue@3.5.13(typescript@5.7.3))
       vue-router:
         specifier: ^4.5.0
         version: 4.5.0(vue@3.5.13(typescript@5.7.3))
+      vue3-pdfjs:
+        specifier: 0.1.6
+        version: 0.1.6(typescript@5.7.3)
       vue3-slide-verify:
         specifier: ^1.1.6
         version: 1.1.6(typescript@5.7.3)
@@ -819,6 +825,10 @@ packages:
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
 
+  dommatrix@1.0.3:
+    resolution: {integrity: sha512-l32Xp/TLgWb8ReqbVJAFIvXmY7go4nTxxlWiAFyhoQw9RKEOHBZNnyGvJWqDVSPmq3Y9HlM4npqF/T6VMOXhww==}
+    deprecated: dommatrix is no longer maintained. Please use @thednp/dommatrix.
+
   dotenv@16.4.7:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
@@ -1325,6 +1335,14 @@ packages:
   pathe@2.0.2:
     resolution: {integrity: sha512-15Ztpk+nov8DR524R4BF7uEuzESgzUEAV4Ah7CUMNGXdE5ELuvxElxGXndBl32vMSsWa1jpNf22Z+Er3sKwq+w==}
 
+  pdfjs-dist@2.16.105:
+    resolution: {integrity: sha512-J4dn41spsAwUxCpEoVf6GVoz908IAA3mYiLmNxg8J9kfRXc2jxpbUepcP0ocp0alVNLFthTAM8DZ1RaHh8sU0A==}
+    peerDependencies:
+      worker-loader: ^3.0.8
+    peerDependenciesMeta:
+      worker-loader:
+        optional: true
+
   perfect-debounce@1.0.0:
     resolution: {integrity: sha512-xCy9V055GLEqoFaHoC1SoLIaLmWctgCUaBaWxDZ7/Zx4CTyX7cJQLJOok/orfjZAh9kEYpjJa4d0KcJmCbctZA==}
 
@@ -1680,10 +1698,19 @@ packages:
     peerDependencies:
       vue: ^3.2.25
 
+  vue-pdf-embed@1.2.1:
+    resolution: {integrity: sha512-4uUm4wxaEGT9cS1cyuagAmMJjBxfQXWG1MvdGPesD3CiXhhSp4i0VMUCYwhFXtZ5+QqWv4mXbfLJ29Wpt+Qcuw==}
+    peerDependencies:
+      vue: ^2.x || ^3.x
+
   vue-router@4.5.0:
     resolution: {integrity: sha512-HDuk+PuH5monfNuY+ct49mNmkCRK4xJAV9Ts4z9UFc4rzdDnxQLyCMGGc8pKhZhHTVzfanpNwB/lwqevcBwI4w==}
     peerDependencies:
       vue: ^3.2.0
+
+  vue3-pdfjs@0.1.6:
+    resolution: {integrity: sha512-7UaWbsp8wNqB0y/rRlyo5yRb0S+XOkkSpmdUuS267Dhi07Pt4RFEetQ8inrpf/aTFJwGnW0Uc/UE4p376s+Zmw==}
+    engines: {node: '>=10.0.0'}
 
   vue3-slide-verify@1.1.6:
     resolution: {integrity: sha512-CYTmO4rZRRhPBgq5gceYRXkVXcmQf0/Xs/O20u16WPEjm1QFRYtDuW607KCVZ95RcR0Ovdj/c7e+9hYxIQkuBQ==}
@@ -1695,6 +1722,10 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  web-streams-polyfill@3.3.3:
+    resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
+    engines: {node: '>= 8'}
 
   webpack-virtual-modules@0.6.2:
     resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
@@ -2405,6 +2436,8 @@ snapshots:
 
   dlv@1.1.3: {}
 
+  dommatrix@1.0.3: {}
+
   dotenv@16.4.7: {}
 
   dunder-proto@1.0.1:
@@ -2868,6 +2901,11 @@ snapshots:
 
   pathe@2.0.2: {}
 
+  pdfjs-dist@2.16.105:
+    dependencies:
+      dommatrix: 1.0.3
+      web-streams-polyfill: 3.3.3
+
   perfect-debounce@1.0.0: {}
 
   picocolors@1.1.1: {}
@@ -3259,10 +3297,22 @@ snapshots:
       screenfull: 5.2.0
       vue: 3.5.13(typescript@5.7.3)
 
+  vue-pdf-embed@1.2.1(vue@3.5.13(typescript@5.7.3)):
+    dependencies:
+      vue: 3.5.13(typescript@5.7.3)
+
   vue-router@4.5.0(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.13(typescript@5.7.3)
+
+  vue3-pdfjs@0.1.6(typescript@5.7.3):
+    dependencies:
+      pdfjs-dist: 2.16.105
+      vue: 3.5.13(typescript@5.7.3)
+    transitivePeerDependencies:
+      - typescript
+      - worker-loader
 
   vue3-slide-verify@1.1.6(typescript@5.7.3):
     dependencies:
@@ -3279,6 +3329,8 @@ snapshots:
       '@vue/shared': 3.5.13
     optionalDependencies:
       typescript: 5.7.3
+
+  web-streams-polyfill@3.3.3: {}
 
   webpack-virtual-modules@0.6.2: {}
 

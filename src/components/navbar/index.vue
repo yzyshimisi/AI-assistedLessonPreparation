@@ -45,7 +45,7 @@ const loginOut = () => {
   localStorage.removeItem("token");
   loginstore.setLogin(false);
   userinfostore.clearInfo();
-  router.push('/login');
+  router.push('/');
 }
 </script>
 

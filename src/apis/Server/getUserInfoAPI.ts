@@ -1,6 +1,6 @@
 import { request } from "../request";
 
-const token = localStorage.getItem('token')
+let token = localStorage.getItem('token')
 
 const getUserInfoAPI = async () => {
     return request("/api/user/personal",{
