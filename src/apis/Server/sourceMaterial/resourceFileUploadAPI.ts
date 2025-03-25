@@ -2,7 +2,7 @@ import { request } from "../../request";
 
 const token = localStorage.getItem('token')
 
-const resourceFileUploadAPI = (data:{
+const resourceFileUploadAPI = async (data:{
     file: File
 }) => {
     let formFile = new FormData()

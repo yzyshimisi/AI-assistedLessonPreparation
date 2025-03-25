@@ -6,7 +6,8 @@ const publishResourcesAPI = async (data:{
     resource_type: number,
     title: string,
     content: string,
-    cover_img?: string,
+    cover_img: string,
+    subject_name: string,
 }) => {
     return request('/api/share/resource',{
         method: "post",

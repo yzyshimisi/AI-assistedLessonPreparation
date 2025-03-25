@@ -24,13 +24,14 @@
   <div class="mt-4">
     <experienceDiscuss v-show="choModule===0"></experienceDiscuss>
     <coursewareSharing v-show="choModule===1"></coursewareSharing>
+    <videoSharing v-show="choModule===2"></videoSharing>
   </div>
 </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { materialMenu, experienceDiscuss, coursewareSharing } from "../../components"
+import { materialMenu, experienceDiscuss, coursewareSharing, videoSharing } from "../../components"
 
 const choModule = ref<number>(0)
 </script>

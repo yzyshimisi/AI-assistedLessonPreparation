@@ -2,12 +2,23 @@
 <div>
   <div v-show="!isShowPublishExperienceForm">     <!-- 列表显示 -->
     <div v-show="viewExperienceDetailsInd===-1">
-      <div class="flex gap-8 ml-4">
+      <!-- 搜索框 -->
+      <div class="flex gap-8">
         <label class="input input-bordered flex items-center gap-2">
           <input v-model="searchExperienceKey" type="text" class="grow w-[800px]" placeholder="在此处可以输入关键词查找相关的经验帖" />
           <el-icon><Search /></el-icon>
         </label>
-        <button @click="isShowPublishExperienceForm=true" class="btn bg-[#e5dbf5] text-[#67578f] hover:bg-[#e5dbf5]">上传我的经验</button>
+        <button @click="openPublishForm" class="btn bg-[#e5dbf5] text-[#67578f] hover:bg-[#e5dbf5]">上传我的经验</button>
+      </div>
+      <!-- 科目列表 -->
+      <div class="flex gap-4 w-[1000px] mt-4">
+        <button
+            v-for="(value,index) in subjectList"
+            @click="choSubjectInd = index"
+            class="btn btn-sm h-full btn-outline hover:bg-[#e8def7] hover:text-base-content text-base font-normal flex"
+            :class="index===choSubjectInd ? 'bg-[#e5dbf5]' : ''"
+        >
+          <el-icon v-show="index===choSubjectInd"><Select /></el-icon>{{ value }}</button>
       </div>
       <div class="flex flex-col gap-10 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[680px] w-[1060px] overflow-y-auto">
         <div
@@ -52,6 +63,10 @@
       <div class="flex flex-col gap-6 mt-6">
         <p class="text-[#9ca3af]">请输入经验帖相关信息</p>
         <div class="flex gap-6 items-center">
+          <p>当前科目：</p>
+          <p class="font-bold">{{ subjectList[choSubjectInd] }}</p>
+        </div>
+        <div class="flex gap-6 items-center">
           <p>经验帖名称</p>
           <input v-model="publishExperienceFormData['title']" type="text" placeholder="请输入经验帖名称" class="input input-bordered h-[42px] w-[800px]" />
         </div>
@@ -84,6 +99,7 @@ const publishExperienceFormData = ref({
   title: '',
   content: '',
   cover_img: '',
+  subject_name: '',
 })
 
 const viewExperienceDetailsInd = ref<number>(-1);
@@ -95,14 +111,22 @@ watch(()=>searchExperienceKey.value,()=>{
 })
 
 const subjectList = ref<Array<string>>([])
+const choSubjectInd = ref<number>(-1)
+
+watch(()=>choSubjectInd.value,()=>{
+  getResourcesList()
+})
 
 onMounted(()=>{
-  getResourcesList()
   getSubjectList()
 })
 
 const getResourcesList = () => {
-  useRequest(()=>getResourcesListAPI({resource_type:1}),{
+  if(choSubjectInd.value !== -1)
+  useRequest(()=>getResourcesListAPI({
+    resource_type:1,
+    subject_name:subjectList.value[choSubjectInd.value]}
+  ),{
     onSuccess(res){
       if(res['code']===200){
         experienceResourceList.value = res['data']
@@ -115,15 +139,23 @@ const getResourcesList = () => {
 
 const publishExperience = () => {
   if(publishExperienceFormData.value.title==='' || publishExperienceFormData.value.content===''){
-    ElMessage({message: '帖子名称与帖子内容不能为空！', type: 'warning',plain: true,})
+    ElMessage({message: '帖子名称与帖子内容不能为空！', type: 'warning'})
     return
   }
+  publishExperienceFormData.value.subject_name = subjectList.value[choSubjectInd.value]
   useRequest(()=>publishResourcesAPI(publishExperienceFormData.value),{
     onSuccess(res){
       if(res['code']===200){
         getResourcesList()
         isShowPublishExperienceForm.value = false
-        ElMessage({message: '发表成功', type: 'success',plain: true,})
+        publishExperienceFormData.value = {
+          resource_type: 1,
+          title: '',
+          content: '',
+          cover_img: '',
+          subject_name: '',
+        }
+        ElMessage({message: '发表成功', type: 'success'})
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
@@ -131,7 +163,11 @@ const publishExperience = () => {
   })
 }
 
-const { data, run } = useRequest(()=>searchResourcesAPI({resource_type:1,keyword:searchExperienceKey.value}),{
+const { data, run } = useRequest(()=>searchResourcesAPI({
+  resource_type:1,
+  keyword:searchExperienceKey.value,
+  subject_name: subjectList.value[choSubjectInd.value]
+}),{
   debounceWait: 1000,
   manual: true,
   onSuccess(res){
@@ -157,6 +193,14 @@ const getSubjectList = () => {
       }
     }
   })
+}
+
+const openPublishForm = () => {
+  if(choSubjectInd.value === -1){
+    ElMessage({message: '请先选择一个科目！', type: 'warning',})
+    return
+  }
+  isShowPublishExperienceForm.value = true
 }
 </script>
 
