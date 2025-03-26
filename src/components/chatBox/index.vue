@@ -1,9 +1,10 @@
 <template>
-<div id="container" class="fixed bottom-[20px] mt-5" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
+<div id="container" class="fixed bottom-0" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
+  <!-- 聊天框 -->
   <div
       id="chatBox"
-      class="overflow-y-scroll bg-base-300 px-5 py-8"
-      :class="[props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]']"
+      class="h-[82%] bg-base-300 overflow-y-scroll px-5 py-8"
+      :class="[props['isOpenFuncForm'] ? 'w-[52vw]' : 'w-[59vw]']"
   >
     <div v-for="(value,index) in chatMsg" class="mb-2">
       <div class="chat" :class="[chatMsg[index]['role'] === 'user' ? 'chat-end' : 'chat-start']">
@@ -27,7 +28,8 @@
       <span class="loading loading-dots loading-lg"></span>
     </div>
   </div>
-  <div class="textarea textarea-bordered  flex w-[1000px] mt-7" :class="props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]'">
+  <!-- 输入框 -->
+  <div class="textarea textarea-bordered flex mt-4" :class="props['isOpenFuncForm'] ? 'w-[52vw]' : 'w-[59vw]'">
     <textarea
         v-model="textInput"
         @keydown.enter.prevent="enterKeyDown"
@@ -41,10 +43,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch, nextTick,} from "vue";
+import { ref, onMounted, watch, nextTick } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { getChatHistoryAPI, sendMsgAPI } from "../../apis";
-import {ElMessage, ElNotification} from 'element-plus';
+import { ElMessage, ElNotification } from 'element-plus';
 import { useMainStore } from "../../stores";
 
 const userinfostore = useMainStore().userInfoStore();
@@ -74,45 +76,48 @@ watch([()=>props.isWaitRes],()=>{
   }
 })
 
-watch(()=>props.id,()=>{
+watch(()=>props.id,()=>{    // 选择不同的会话，获取不同的历史记录
   if(props.id !== -1)
     getChatHistory();
 })
 
-const pageInfo = ref<object>({
+const pageInfo = ref<object>({  // 滚动加载（还未实现）
   page_num: 1,
   page_size: 10,
 })
 
-const chatBoxHeight = ref<number>(500)    // 这里的高度是除去文本框的高度，页面的滚动不会影响其值
+const originHeight = ref<number>(0);
 
 const textArea = ref<HTMLElement>()    // 文本框DOM元素
 const textAreaOldH = ref<number>()   // 文本框的高度
 
-const windowScrollY = ref<number>(-1);
+const windowScrollY = ref<number>(-1);  // 页面滚动条距离顶端的长度
 const oldScrollY = ref<number>(-1);
 
 watch(()=>windowScrollY.value,()=>{
-  let chatBox = document.getElementById('chatBox')
-  let scrollH = windowScrollY.value <= 145 ?  windowScrollY.value : 145
+  let container = document.getElementById('container')
+  let scrollTop = windowScrollY.value <= 145 ?  windowScrollY.value : 145
 
-  chatBox.style.height = (chatBoxHeight.value + scrollH).toString().concat('px')
+  container.style.height = (originHeight.value + scrollTop).toString().concat('px')   // 聊天框加上对应的高度
+
   oldScrollY.value = windowScrollY.value
 })
 
 onMounted(()=>{
+  // 初始化容器的高度
+  originHeight.value = window.innerHeight - 75 - 65 - 4 - 20
   let container = document.getElementById('container')
-  console.log(container.offsetHeight)
-  console.log(chatBoxHeight.value)
-  nextTick(()=>{
+  container.style.height = originHeight.value.toString().concat('px')   // 初始高度：首图、导航栏、mt-1
+
+  nextTick(()=>{    // 当页面加载好后，处理一次滚动条的事件，避免在滚动条中间刷新页面时，造成的高度错误
     handleScroll()
   })
 
   getChatHistory();
 
-  window.addEventListener('scroll', handleScroll, true);  // 监听页面的滚动
+  window.addEventListener('scroll', handleScroll, true);  // 监听页面的滚动，让聊天框始终占满用户的可视区域
 
-  setTextArea()   // 设置文本框的监听
+  setTextArea()   // 监听文本框的高度变化
 })
 
 const sendMsg = () => {
@@ -234,10 +239,8 @@ const setTextArea = () => {
         let chatBox = document.getElementById('chatBox');
         const newHeight = textArea.value.offsetHeight;
         if (newHeight !== textAreaOldH.value) {
-          let changedH = newHeight - textAreaOldH.value;
+          let dH = newHeight - textAreaOldH.value;
           if (chatBox && chatBox.style.height) {
-            chatBoxHeight.value = chatBoxHeight.value - changedH
-            chatBox.style.height = `${ Number(chatBox.style.height.split('px')[0]) - changedH }px`;
           }
           textAreaOldH.value = newHeight; // 更新初始高度
         }

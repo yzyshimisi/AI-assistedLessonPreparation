@@ -1,6 +1,7 @@
 <template>
-<div class="min-h-screen max-h-[2000px] w-screen flex gap-8">
+<div class="min-h-screen w-screen flex gap-8">
   <materialMenu></materialMenu>
+  <!-- 模块列表 -->
   <div class="flex flex-col gap-1 w-[100px] mt-4">
     <button
         @click="choModule=0"

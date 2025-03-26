@@ -5,13 +5,13 @@
       <!-- 搜索框 -->
       <div class="flex gap-8">
         <label class="input input-bordered flex items-center gap-2">
-          <input v-model="searchVideoKey" type="text" class="grow w-[800px]" placeholder="在此处可以输入关键词查找相关的视频" />
+          <input v-model="searchVideoKey" type="text" class="grow w-[50vw]" placeholder="在此处可以输入关键词查找相关的视频" />
           <el-icon><Search /></el-icon>
         </label>
         <button @click="openPublishForm" class="btn bg-[#e5dbf5] text-[#67578f] hover:bg-[#e5dbf5]">上传我的视频</button>
       </div>
       <!-- 科目列表 -->
-      <div class="flex gap-4 w-[1000px] mt-4">
+      <div class="flex gap-4 mt-4">
         <button
             v-for="(value,index) in subjectList"
             @click="choSubjectInd = index"
@@ -21,10 +21,10 @@
           <el-icon v-show="index===choSubjectInd"><Select /></el-icon>{{ value }}</button>
       </div>
       <!-- 条目 -->
-      <div class="grid grid-cols-2 gap-y-6 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[1000px] w-[1060px] overflow-y-auto">
+      <div class="grid grid-cols-2 gap-y-6 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[85vh] w-[62vw] overflow-y-auto">
         <div
             v-for="(value,index) in videoResourceList"
-            class="bg-white p-4 w-[480px] h-[340px] relative"
+            class="bg-white p-4 w-[97%] h-[340px] relative"
         >
           <div class="flex items-center">
             <div class="avatar">
@@ -33,7 +33,7 @@
               </div>
             </div>
             <p class="ml-4 font-bold text-sm">{{ value['username'] }}</p>
-            <p class="font-bold text-2xl ml-4 w-[200px] truncate">{{ value['title'] }}</p>
+            <p class="font-bold text-2xl ml-6 w-[40%] truncate">{{ value['title'] }}</p>
             <div @click="viewDetails(index)" class="absolute right-[20px]"><button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
           </div>
           <img :src="value['cover_img']" class="mt-4 max-h-[250px]">
@@ -41,11 +41,11 @@
       </div>
       <!-- 助手角色 -->
       <div v-show="choSubjectInd === -1 || !videoResourceList" class="fixed bottom-[30px]">
-        <img :src="assistantRoleSrc" class="w-[350px]">
+        <img :src="assistantRoleSrc" class="w-[20vw]">
       </div>
     </div>
     <div v-if="viewVideoDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">     <!-- 详情显示 -->
-      <div class="bg-white p-5 w-[1000px] h-[830px] relative">
+      <div class="bg-white p-5 w-[60vw] relative">
         <div class="flex items-center">
           <button @click="viewVideoDetailsInd=-1" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
           <div class="flex flex-col font-bold absolute right-[30px]">
@@ -71,7 +71,7 @@
     </div>
   </div>
   <div v-show="isShowPublishVideoForm" class="bg-[#f3f1ff] p-4">   <!-- 发帖表单 -->
-    <div class="bg-white p-4 w-[1000px] relative">
+    <div class="bg-white p-4 w-[56vw] relative">
       <div class="flex items-center">
         <button @click="isShowPublishVideoForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
         <p class="absolute right-[70px] font-semibold">{{ userInfo.username ? userInfo.username : '未设定' }}</p>
@@ -83,8 +83,8 @@
           <p class="font-bold">{{ subjectList[choSubjectInd] }}</p>
         </div>
         <div class="flex gap-6 items-center">
-          <p>视频名称</p>
-          <input v-model="publishVideoFormData['title']" type="text" placeholder="请输入视频名称" class="input input-bordered h-[42px] w-[800px]" />
+          <p class="whitespace-nowrap">视频名称</p>
+          <input v-model="publishVideoFormData['title']" type="text" placeholder="请输入视频名称" class="input input-bordered h-[42px] w-full" />
         </div>
         <div class="flex gap-6">
           <p>视频内容</p>
@@ -92,7 +92,7 @@
               ref="videoUpload"
               :on-change="videoFileChange"
               :on-exceed="videoFileExceed"
-              class="upload-demo"
+              class="upload-demo w-[35%]"
               drag
               :auto-upload="false"
               :limit="1"
@@ -108,7 +108,7 @@
               ref="videoCoverUpload"
               :on-change="videoCoverFileChange"
               :on-exceed="videoCoverFileExceed"
-              class="upload-demo"
+              class="upload-demo w-[35%]"
               drag
               :auto-upload="false"
               :limit="1"

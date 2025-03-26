@@ -1,5 +1,5 @@
 <template>
-<div class="navbar bg-base-100 shadow-md h-[50px]">
+<div class="navbar bg-base-100 shadow-md h-[65px]">
   <div class="flex-1">
     <label v-if="loginstore.loginSession" class="input input-bordered flex items-center gap-2 ml-[5%]">
       <input type="text" class="grow" placeholder="功能搜索" />

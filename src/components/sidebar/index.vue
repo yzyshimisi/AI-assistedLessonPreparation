@@ -1,10 +1,10 @@
 <template>
-<div class="bg-base-300 min-w-[120px]">
+<div class="bg-base-300 w-[7vw]">
   <ul class="menu rounded-box text-base">
     <li>
       <router-link to="/chat">
         <el-icon size="22"><ChatDotRound /></el-icon>
-        对话
+        <p>对话</p>
       </router-link>
     </li>
     <li>

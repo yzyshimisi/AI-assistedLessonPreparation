@@ -1,6 +1,6 @@
 <template>
-<div class="min-h-screen bg-base-200">
-  <img src="/topPic.png" class="w-full h-[75px]">
+<div class="min-h-screen min-w-screen bg-base-200">
+  <img src="/topPic.png" class="h-[75px] w-full">
   <navbar></navbar>
   <div class="flex mt-1">
     <sidebar v-if="loginstore.loginSession"></sidebar>
@@ -17,7 +17,4 @@ const loginstore = useMainStore().loginStore();
 </script>
 
 <style>
-page{
-  background-color: #161622;
-}
 </style>

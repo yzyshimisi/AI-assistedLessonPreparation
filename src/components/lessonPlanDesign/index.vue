@@ -1,5 +1,5 @@
 <template>
-<div class="w-[375px] min-h-[1200px] bg-base-100 rounded-xl p-5 flex flex-col gap-7">
+<div class="w-[22vw] min-h-[1200px] bg-base-100 rounded-xl p-5 flex flex-col gap-7">
   <div>
     <span><span class="text-red-600">* </span>教案名称<el-icon @click="closeFuncForm()" class="float-right hover:cursor-pointer"><Close /></el-icon></span>
     <input @keyup.enter="createLessonPlans" v-model="formInfo['textbook_name']" type="text" placeholder="请输入教案的名称" class="input input-bordered w-full mt-2" />

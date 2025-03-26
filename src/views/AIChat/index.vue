@@ -1,6 +1,7 @@
 <template>
-<div class="flex min-h-screen w-full bg-base-200 relative">
-  <div class="card bg-base-100 w-[220px] shadow-md">
+<div class="flex min-h-screen w-full relative">
+  <!-- 工具栏 -->
+  <div class="card bg-base-100 w-[13vw] shadow-md">
     <div class="card-body">
       <div>
         <span class="flex float-right">
@@ -11,13 +12,13 @@
       <h2 class="card-title mb-1 flex justify-center">会话列表</h2>
       <div style="border-bottom: 2px solid #000000;"></div>
       <div v-for="(value,index) in topicList"
-           class="w-[160px] rounded-xl hover:bg-base-300 hover:cursor-pointer text-base p-2"
+           class="w-full rounded-xl hover:bg-base-300 hover:cursor-pointer text-base p-2"
            :class="[index === nowTopicInd ? 'bg-base-300' : '']"
            @mouseenter="showChoIcon(index)" @mouseleave="notShowChoIcon(index)"
            @click="chooseTopic(index)"
       >
         <div class="flex items-center justify-between">
-          <div class="w-[120px]"><p class="truncate">{{ value.title }}</p></div>
+          <div class="w-[85%]"><p class="truncate">{{ value.title }}</p></div>
           <div
               v-if="isShowChoIcon[index] || index===nowTopicInd"
               onclick="topicInfo.showModal()" @click.stop="changeDiaInd(index)"
@@ -43,9 +44,9 @@
         :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
     ></lessonPlanDesign>
   </div>
-  <div v-if="nowTopicInd === -1 && nowFuncForms === -1" class="flex absolute bottom-0 left-[200px]">
+  <div v-if="nowTopicInd === -1" class="flex fixed left-[20vw] bottom-0">
     <div>
-      <img :src="assistantRoleSrc" class="w-[350px]">
+      <img :src="assistantRoleSrc" class="w-[20vw]">
     </div>
     <div class="chat chat-start">
       <div class="chat-bubble bg-base-100 text-base-content max-w-96">你好！这里是教小帮，请选择会话记录或新建会话</div>

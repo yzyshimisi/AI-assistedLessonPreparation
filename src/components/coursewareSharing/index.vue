@@ -3,15 +3,16 @@
   <div>
     <div v-show="!isShowPublishCoursewareForm">
       <div v-show="viewCoursewareDetailsInd===-1">      <!-- 列表显示 -->
+        <!-- 搜索框 -->
         <div class="flex gap-8">
           <label class="input input-bordered flex items-center gap-2">
-            <input v-model="searchCoursewareKey" type="text" class="grow w-[800px]" placeholder="在此处可以输入关键词查找相关的课件" />
+            <input v-model="searchCoursewareKey" type="text" class="grow w-[50vw]" placeholder="在此处可以输入关键词查找相关的课件" />
             <el-icon><Search /></el-icon>
           </label>
           <button @click="openPublishForm" class="btn bg-[#e5dbf5] text-[#67578f] hover:bg-[#e5dbf5]">上传我的课件</button>
         </div>
         <!-- 科目列表 -->
-        <div class="flex gap-4 w-[1000px] mt-4">
+        <div class="flex gap-4 mt-4">
           <button
               v-for="(value,index) in subjectList"
               @click="choSubjectInd = index"
@@ -20,11 +21,11 @@
           >
             <el-icon v-show="index===choSubjectInd"><Select /></el-icon>{{ value }}</button>
         </div>
-        <!-- 条目 -->
-        <div class="grid grid-cols-2 gap-y-6 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[1000px] w-[1060px] overflow-y-auto">
+        <!-- 条目列表 -->
+        <div class="grid grid-cols-2 gap-y-6 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[85vh] w-[62vw] overflow-y-auto">
           <div
               v-for="(value,index) in coursewareResourceList"
-              class="bg-white p-4 w-[480px] min-h-[340px] max-h-[500px] relative"
+              class="bg-white p-4 w-[96%] min-h-[340px] max-h-[500px] relative"
           >
             <div class="flex items-center">
               <div class="avatar">
@@ -33,7 +34,7 @@
                 </div>
               </div>
               <p class="ml-4 font-bold text-sm">{{ value['username'] }}</p>
-              <p class="font-bold text-2xl ml-4 w-[200px] truncate">{{ value['title'] }}</p>
+              <p class="font-bold text-2xl ml-6 w-[40%] truncate">{{ value['title'] }}</p>
               <div @click="viewDetails(index)" class="absolute right-[20px]"><button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
             </div>
             <img :src="value['cover_img']" class="mt-4 max-h-[250px]">
@@ -41,11 +42,12 @@
         </div>
         <!-- 助手角色 -->
         <div v-show="choSubjectInd === -1 || !coursewareResourceList" class="fixed bottom-[30px]">
-          <img :src="assistantRoleSrc" class="w-[350px]">
+          <img :src="assistantRoleSrc" class="w-[20vw]">
         </div>
       </div>
-      <div v-if="viewCoursewareDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">     <!-- 详情显示 -->
-        <div class="bg-white p-5 w-[1000px] h-[830px] relative">
+      <!-- 详情显示 -->
+      <div v-if="viewCoursewareDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">
+        <div class="bg-white p-5 w-[60vw] relative">
           <div class="flex items-center">
             <button @click="viewCoursewareDetailsInd=-1" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
             <div class="flex flex-col font-bold absolute right-[30px]">
@@ -70,7 +72,7 @@
             <VuePdfEmbed
                 :source="coursewareResourceList[viewCoursewareDetailsInd]['pdf_url']"
                 :page="pageNum"
-                class="w-[800px]"
+                class="w-[85%]"
             />
             <div class="flex items-center">
               <el-icon @click.prevent="nextPage" size="35" class="py-10 rounded-xl hover:bg-base-200 hover:cursor-pointer"><ArrowRightBold /></el-icon>
@@ -79,8 +81,9 @@
         </div>
       </div>
     </div>
-    <div v-show="isShowPublishCoursewareForm" class="bg-[#f3f1ff] p-4">   <!-- 发帖表单 -->
-      <div class="bg-white p-4 w-[1000px] relative">
+    <!-- 发帖表单 -->
+    <div v-show="isShowPublishCoursewareForm" class="bg-[#f3f1ff] p-4">
+      <div class="bg-white p-4 w-[56vw] relative">
         <div class="flex items-center">
           <button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
           <p class="absolute right-[70px] font-semibold">{{ userInfo.username ? userInfo.username : '未设定' }}</p>
@@ -92,8 +95,8 @@
             <p class="font-bold">{{ subjectList[choSubjectInd] }}</p>
           </div>
           <div class="flex gap-6 items-center">
-            <p>课件名称</p>
-            <input v-model="publishCoursewareFormData['title']" type="text" placeholder="请输入课件名称" class="input input-bordered h-[42px] w-[800px]" />
+            <p class="whitespace-nowrap">课件名称</p>
+            <input v-model="publishCoursewareFormData['title']" type="text" placeholder="请输入课件名称" class="input input-bordered h-[42px] w-full" />
           </div>
           <div class="flex gap-6">
             <p>课件内容</p>
@@ -101,7 +104,7 @@
                 ref="coursewareUpload"
                 :on-change="coursewareFileChange"
                 :on-exceed="coursewareFileExceed"
-                class="upload-demo"
+                class="upload-demo w-[35%]"
                 drag
                 :auto-upload="false"
                 :limit="1"
@@ -117,7 +120,7 @@
                 ref="coursewareCoverUpload"
                 :on-change="coursewareCoverFileChange"
                 :on-exceed="coursewareCoverFileExceed"
-                class="upload-demo"
+                class="upload-demo w-[35%]"
                 drag
                 :auto-upload="false"
                 :limit="1"

@@ -53,6 +53,10 @@ const routes = [
     {
         path: '/sharedSpace',
         component: sharedSpace,
+    },
+    {
+        path: '/home',
+        component: home,
     }
 ]
 

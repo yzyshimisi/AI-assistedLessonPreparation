@@ -5,13 +5,13 @@
       <!-- 搜索框 -->
       <div class="flex gap-8">
         <label class="input input-bordered flex items-center gap-2">
-          <input v-model="searchExperienceKey" type="text" class="grow w-[800px]" placeholder="在此处可以输入关键词查找相关的经验帖" />
+          <input v-model="searchExperienceKey" type="text" class="grow w-[50vw]" placeholder="在此处可以输入关键词查找相关的经验帖" />
           <el-icon><Search /></el-icon>
         </label>
         <button @click="openPublishForm" class="btn bg-[#e5dbf5] text-[#67578f] hover:bg-[#e5dbf5]">上传我的经验</button>
       </div>
       <!-- 科目列表 -->
-      <div class="flex gap-4 w-[1000px] mt-4">
+      <div class="flex gap-4 mt-4">
         <button
             v-for="(value,index) in subjectList"
             @click="choSubjectInd = index"
@@ -20,10 +20,11 @@
         >
           <el-icon v-show="index===choSubjectInd"><Select /></el-icon>{{ value }}</button>
       </div>
-      <div class="flex flex-col gap-10 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[680px] w-[1060px] overflow-y-auto">
+      <!-- 条目列表 -->
+      <div class="flex flex-col gap-10 bg-[#f3f1ff] p-4 mt-4 mb-8 h-[85vh] w-[62vw] overflow-y-auto">
         <div
             v-for="(value,index) in experienceResourceList"
-            class="bg-white p-4 w-[1000px] relative"
+            class="bg-white p-4 w-full relative"
         >
           <div class="flex items-center">
             <div class="avatar">
@@ -39,12 +40,12 @@
         </div>
         <!-- 助手角色 -->
         <div v-show="choSubjectInd === -1 || !experienceResourceList" class="fixed bottom-[30px]">
-          <img :src="assistantRoleSrc" class="w-[350px]">
+          <img :src="assistantRoleSrc" class="w-[20vw]">
         </div>
       </div>
     </div>
     <div v-if="viewExperienceDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">     <!-- 详情显示 -->
-      <div class="bg-white p-5 w-[1000px] h-[830px] relative">
+      <div class="bg-white p-5 w-[60vw] h-full relative">
         <div class="flex items-center">
           <button @click="viewExperienceDetailsInd=-1" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
           <p class="absolute left-1/3 font-bold text-2xl">{{ experienceResourceList[viewExperienceDetailsInd]['title'] }}</p>
@@ -54,12 +55,12 @@
             <!--          <p class="text-sm">创建时间：{{ experienceResourceList[viewExperienceDetailsInd]['created_at'].split(' ')[0] }}</p>-->
           </div>
         </div>
-        <p class="mt-8 h-[730px] overflow-y-auto" style="white-space: pre-wrap;">{{ experienceResourceList[viewExperienceDetailsInd]['content'] }}</p>
+        <p class="mt-8" style="white-space: pre-wrap;">{{ experienceResourceList[viewExperienceDetailsInd]['content'] }}</p>
       </div>
     </div>
   </div>
   <div v-show="isShowPublishExperienceForm" class="bg-[#f3f1ff] p-4">   <!-- 发帖表单 -->
-    <div class="bg-white p-4 w-[1000px] relative">
+    <div class="bg-white p-4 w-[56vw] relative">
       <div class="flex items-center">
         <button @click="isShowPublishExperienceForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
         <p class="absolute right-[70px] font-semibold">{{ userInfo.username ? userInfo.username : '未设定' }}</p>
