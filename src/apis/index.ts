@@ -19,7 +19,7 @@ import uploadFileAPI from "./Server/myResources/uploadFileAPI";
 import collectFileAPI from "./Server/myResources/collectFileAPI";
 import moveFileAPI from "./Server/myResources/moveFileAPI";
 import searchFileAPI from "./Server/myResources/searchFileAPI";
-import filterFileTypeAPI from "./Server/myResources/filterFileTypeAPI";
+import getFileListByTypeAPI from "./Server/myResources/getFileListByTypeAPI";
 import userUploadAPI from "./Server/userUploadAPI";
 import getRecycleListAPI from "./Server/myResources/getRecycleListAPI";
 import restoreFileAPI from "./Server/myResources/restoreFileAPI";
@@ -60,6 +60,9 @@ import resourceFileUploadAPI from "./Server/sourceMaterial/resourceFileUploadAPI
 import getDirStructureAPI from "./Server/myResources/getDirStructureAPI";
 import getSubjectListAPI from "./Server/sourceMaterial/getSubjectListAPI";
 import oneClickTransferAPI from "./Server/sourceMaterial/oneClickTransferAPI";
+import exportLessonPlanAPI from "./Server/lessonPlanDesign/exportLessonPlanAPI";
+import getLessonPlanInfoAPI from "./Server/lessonPlanDesign/getLessonPlanInfoAPI";
+import modifyLessonPlanAPI from "./Server/lessonPlanDesign/modifyLessonPlanAPI";
 
 export {
     loginAPI,
@@ -83,7 +86,7 @@ export {
     collectFileAPI,
     moveFileAPI,
     searchFileAPI,
-    filterFileTypeAPI,
+    getFileListByTypeAPI,
     userUploadAPI,
     getRecycleListAPI,
     restoreFileAPI,
@@ -124,4 +127,7 @@ export {
     getDirStructureAPI,
     getSubjectListAPI,
     oneClickTransferAPI,
+    exportLessonPlanAPI,
+    getLessonPlanInfoAPI,
+    modifyLessonPlanAPI,
 }

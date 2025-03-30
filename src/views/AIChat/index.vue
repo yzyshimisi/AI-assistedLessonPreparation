@@ -44,9 +44,10 @@
         :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
     ></lessonPlanDesign>
   </div>
-  <div v-if="nowTopicInd === -1" class="flex fixed left-[20vw] bottom-0">
+  <!-- 助手角色 -->
+  <div v-if="nowTopicInd === -1" class="flex fixed left-[25vw] bottom-[10px]">
     <div>
-      <img :src="assistantRoleSrc" class="w-[20vw]">
+      <img :src="assistantRoleSrc" class="h-[300px]">
     </div>
     <div class="chat chat-start">
       <div class="chat-bubble bg-base-100 text-base-content max-w-96">你好！这里是教小帮，请选择会话记录或新建会话</div>
@@ -199,7 +200,7 @@ const changeDiaInd = (ind) => {
 }
 
 const getTopicList = () => {
-  useRequest(()=>getTopicListAPI(),{
+  useRequest(()=>getTopicListAPI(localStorage.getItem('token')),{
     onSuccess(res){
       topicList.value = []
       if(res['code']===200){

@@ -2,7 +2,7 @@ import { request } from "../../../request";
 
 const token = localStorage.getItem('token')
 
-const oneClickInputAPI = async (form_data:{
+const oneClickInputAPI = async (token:string,form_data:{
     file?: File,
     course_id?: number,
 }) => {

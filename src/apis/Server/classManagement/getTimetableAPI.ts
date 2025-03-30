@@ -2,7 +2,7 @@ import { request } from "../../request";
 
 const token = localStorage.getItem('token')
 
-const getTimetableAPI = async (query:{
+const getTimetableAPI = async (token:string,query:{
     academic_year: string,
     academic_term: number,
     week: number,

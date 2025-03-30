@@ -1,9 +1,8 @@
 import { request } from "../../../request";
 
-const token = localStorage.getItem('token')
-
-const delStudentInfoAPI = async (data:{
-    student_ids: Array<string>
+const delStudentInfoAPI = async (token:string,data:{
+    student_ids: Array<string>,
+    course_id: number
 }) => {
     return request('/api/student/info',{
         method: "DELETE",

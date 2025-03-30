@@ -8,7 +8,7 @@
         <p class="text-3xl mt-2">——<span class="text-4xl text-red-600">教小帮</span>AI备课助手</p>
         <div class="flex items-center mt-8 gap-4 absolute right-0">
           <img src="/advertisementPage/smallComponents_1.png" class="w-[80px]">
-          <img @click="" src="/advertisementPage/button_1.png" class="w-[200px] h-[70px] hover:cursor-pointer">
+          <img @click="startUsing" src="/advertisementPage/button_1.png" class="w-[200px] h-[70px] hover:cursor-pointer">
         </div>
       </div>
     </div>
@@ -28,7 +28,12 @@
 </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import router from "../../router";
+
+const startUsing = () => {
+  router.push('/chat')
+}
 </script>
 
 <style scoped>

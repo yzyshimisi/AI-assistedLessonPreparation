@@ -3,7 +3,8 @@
     "module": "commonjs",
     "target": "es2017",
     "lib": ["es2017", "dom"],
-    "sourceMap": true
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "node_modules"

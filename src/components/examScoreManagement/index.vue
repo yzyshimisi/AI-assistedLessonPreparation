@@ -114,7 +114,7 @@ onMounted(()=>{
 })
 
 const getCourseList = () => {
-  useRequest(()=>getCourseListAPI(),{
+  useRequest(()=>getCourseListAPI(localStorage.getItem('token')),{
     onSuccess(res){
       if(res['code']===200){
         courseList.value = res['data']

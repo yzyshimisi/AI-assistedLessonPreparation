@@ -28,21 +28,25 @@
               class="bg-white p-4 w-[96%] min-h-[340px] max-h-[500px] relative"
           >
             <div class="flex items-center">
-              <div class="avatar">
+              <div class="avatar flex items-center absolute">
                 <div class="w-12 rounded-full">
                   <img :src="value['avatar']" />
                 </div>
+                <p class="ml-4 font-bold text-sm">{{ value['username'] }}</p>
               </div>
-              <p class="ml-4 font-bold text-sm">{{ value['username'] }}</p>
-              <p class="font-bold text-2xl ml-6 w-[40%] truncate">{{ value['title'] }}</p>
+              <p class="w-full text-center font-bold text-2xl w-[40%] truncate">{{ value['title'] }}</p>
               <div @click="viewDetails(index)" class="absolute right-[20px]"><button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
             </div>
             <img :src="value['cover_img']" class="mt-4 max-h-[250px]">
           </div>
         </div>
         <!-- 助手角色 -->
-        <div v-show="choSubjectInd === -1 || !coursewareResourceList" class="fixed bottom-[30px]">
-          <img :src="assistantRoleSrc" class="w-[20vw]">
+        <div v-show="choSubjectInd === -1 || !coursewareResourceList" class="fixed bottom-[30px] flex">
+          <img :src="assistantRoleSrc" class="h-[300px]">
+          <div class="chat chat-start">
+            <div v-if="choSubjectInd===-1" class="chat-bubble bg-base-100 text-base-content max-w-96">您好！这里是课件共享区，请先选择一个科目</div>
+            <div v-else-if="!coursewareResourceList" class="chat-bubble bg-base-100 text-base-content max-w-96">该科目目前还没有任何课件哦</div>
+          </div>
         </div>
       </div>
       <!-- 详情显示 -->
@@ -57,10 +61,10 @@
             </div>
           </div>
           <!-- 预览PDF -->
-          <div class="mt-10 flex items-center justify-between">
-            <p class="font-bold text-xl">当前页码：第{{ pageNum }}页</p>
-            <p class="absolute w-full text-center font-bold text-3xl">{{ coursewareResourceList[viewCoursewareDetailsInd]['title'] }}</p>
-            <div class="flex flex-col">
+          <div class="mt-10 flex items-center justify-between relative">
+            <p class="absolute font-bold text-xl">当前页码：第{{ pageNum }}页</p>
+            <p class="w-full text-center font-bold text-3xl">{{ coursewareResourceList[viewCoursewareDetailsInd]['title'] }}</p>
+            <div class="flex flex-col absolute right-0">
               <button @click="oneClickTransfer" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键转存</button>
               <button @click="oneClickDownload" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键下载</button>
             </div>

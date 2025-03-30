@@ -27,28 +27,32 @@
             class="bg-white p-4 w-full relative"
         >
           <div class="flex items-center">
-            <div class="avatar">
+            <div class="avatar flex items-center absolute">
               <div class="w-12 rounded-full">
                 <img :src="value['avatar']" />
               </div>
+              <p class="ml-4 font-bold">{{ value['username'] }}</p>
             </div>
-            <p class="ml-4 font-bold">{{ value['username'] }}</p>
-            <p class="absolute left-1/3 font-bold text-2xl">{{ value['title'] }}</p>
+            <p class="w-full text-center font-bold text-2xl">{{ value['title'] }}</p>
             <div @click="viewDetails(index)" class="absolute right-[40px]"><button @click="isShowPublishExperienceForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
           </div>
           <p class="mt-4 max-h-[92px] text-ellipsis overflow-hidden">{{ value['content'] }}</p>
         </div>
         <!-- 助手角色 -->
-        <div v-show="choSubjectInd === -1 || !experienceResourceList" class="fixed bottom-[30px]">
-          <img :src="assistantRoleSrc" class="w-[20vw]">
+        <div v-show="choSubjectInd === -1 || !experienceResourceList" class="fixed bottom-[30px] flex">
+          <img :src="assistantRoleSrc" class="h-[300px]">
+          <div class="chat chat-start">
+            <div v-if="choSubjectInd===-1" class="chat-bubble bg-base-100 text-base-content max-w-96">您好！这里是经验讨论区，请先选择一个科目</div>
+            <div v-else-if="!experienceResourceList" class="chat-bubble bg-base-100 text-base-content max-w-96">该科目目前还没有任何经验帖子，您可以尝试添加一篇</div>
+          </div>
         </div>
       </div>
     </div>
     <div v-if="viewExperienceDetailsInd!==-1" class="bg-[#f3f1ff] p-4 mb-4">     <!-- 详情显示 -->
       <div class="bg-white p-5 w-[60vw] h-full relative">
         <div class="flex items-center">
-          <button @click="viewExperienceDetailsInd=-1" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
-          <p class="absolute left-1/3 font-bold text-2xl">{{ experienceResourceList[viewExperienceDetailsInd]['title'] }}</p>
+          <button @click="viewExperienceDetailsInd=-1" class="absolute left-[20px] btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">返回</button>
+          <p class="w-full text-center font-bold text-2xl">{{ experienceResourceList[viewExperienceDetailsInd]['title'] }}</p>
           <div class="flex flex-col font-bold absolute right-[30px]">
             <p class="text-sm">{{ experienceResourceList[viewExperienceDetailsInd]['username'] }}</p>
             <p class="text-sm">修改时间：{{ experienceResourceList[viewExperienceDetailsInd]['updated_at'].split(' ')[0] }}</p>

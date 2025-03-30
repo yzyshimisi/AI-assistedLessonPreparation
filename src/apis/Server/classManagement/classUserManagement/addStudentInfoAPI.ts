@@ -1,8 +1,6 @@
 import { request } from "../../../request";
 
-const token = localStorage.getItem('token')
-
-const addStudentInfoAPI = async (data:{
+const addStudentInfoAPI = async (token:string,data:{
     student_id: string,
     name: string,
     college: string,

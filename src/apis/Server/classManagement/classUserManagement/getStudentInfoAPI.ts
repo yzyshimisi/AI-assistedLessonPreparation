@@ -1,8 +1,6 @@
 import { request } from "../../../request";
 
-const token = localStorage.getItem('token')
-
-const getStudentInfoAPI = async (query:{
+const getStudentInfoAPI = async (token:string,query:{
     course_id: number,
     class: string,
 }) => {

@@ -202,7 +202,7 @@ const getStudentInfo = () => {
   if(courseId.value === -1 || nowCourseClassInd.value === -1){
     return
   }
-  useRequest(()=>getStudentInfoAPI({
+  useRequest(()=>getStudentInfoAPI(localStorage.getItem('token'),{
     course_id: courseId.value,
     class: courseClassesList.value[nowCourseClassInd.value]
   }),{
@@ -221,7 +221,7 @@ const getStudentInfo = () => {
 }
 
 const getCourseList = () => {
-  useRequest(()=>getCourseListAPI(),{
+  useRequest(()=>getCourseListAPI(localStorage.getItem('token')),{
     onSuccess(res){
       if(res['code']===200){
         courseList.value = res['data']
@@ -253,10 +253,11 @@ const oneClickInput = () => {
       return
     }
 
-    useRequest(()=>oneClickInputAPI({course_id:courseId.value,file:excelFile.value}),{
+    useRequest(()=>oneClickInputAPI(localStorage.getItem('token'),{course_id:courseId.value,file:excelFile.value}),{
       onSuccess(res){
         if(res['code']===200){
           ElMessage({message: '录入成功', type: 'success',})
+          getStudentInfo()
         }else{
           ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
         }
@@ -290,11 +291,11 @@ const addStudentInfo = () => {
   }
 
   addedStudentInfo.value.course_id = courseId.value
-  useRequest(()=>addStudentInfoAPI(addedStudentInfo.value),{
+  useRequest(()=>addStudentInfoAPI(localStorage.getItem('token'),addedStudentInfo.value),{
     onSuccess(res){
       if(res['code']===200){
         ElMessage({message: '添加成功', type: 'success',})
-        addedStudentInfo.value = {
+        addedStudentInfo.value = {    // 情况缓存
           name: '',
           student_id: '',
           college: '',
@@ -302,6 +303,7 @@ const addStudentInfo = () => {
           major: '',
           course_id: -1,
         }
+        getStudentInfo()
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
@@ -355,7 +357,7 @@ const delStudentInfo = () => {
     }
   }
   if(student_ids.length === 0) return
-  useRequest(()=>delStudentInfoAPI({student_ids:student_ids}),{
+  useRequest(()=>delStudentInfoAPI(localStorage.getItem("token"),{student_ids:student_ids,course_id:courseId.value}),{
     onSuccess(res){
       if(res['code']===200){
         getStudentInfo();

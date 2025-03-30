@@ -1,8 +1,6 @@
 import { request } from "../request";
 
-let token = localStorage.getItem('token')
-
-const getUserInfoAPI = async () => {
+const getUserInfoAPI = async (token) => {
     return request("/api/user/personal",{
         method: 'get',
         headers: {"Content-Type":"application/json", 'Authorization':`Bearer ${token}`},

@@ -1,14 +1,14 @@
 <template>
 <div class="h-screen w-screen bg-base-200 flex gap-1">
   <myMenu></myMenu>
-  <ul class="menu rounded-box w-[180px] h-full bg-base-100 relative text-base">
+  <ul class="menu rounded-box w-[12vw] h-full bg-base-100 relative text-base">
     <ul class="menu rounded-box text-base">
       <li>    <!-- 目录区域 -->
         <details open>
-          <summary>{{ Object.keys(nowPath[nowPath.length-1])[0] }}</summary>
+          <summary><p class="w-full truncate">{{ Object.keys(nowPath[nowPath.length-1])[0] }}</p></summary>
           <ul>
             <li v-for="(value,index) in dirStructure">
-              <a @click="changeDirectory_2(value)"><img :src="fileIcon[0]" class="w-[25px]">{{ value['name'] }}</a>
+              <a @click="changeDirectory_2(value)"><img :src="fileIcon[0]" class="w-[25px]"><p class="truncate">{{ value['name'] }}</p></a>
             </li>
           </ul>
         </details>
@@ -42,7 +42,8 @@
         </div>
       </div>
     </div>
-    <div class="bg-base-100 w-[1100px] h-[700px] p-4 relative">
+    <!-- 文件域 -->
+    <div class="bg-base-100 w-[60vw] h-[700px] p-4 relative">
       <div class="flex items-center relative">
         <el-icon @click="createDir" size="40" color="#6b21a8" class="hover:bg-base-300 hover:cursor-pointer"><FolderAdd /></el-icon>
         <div>
@@ -59,6 +60,7 @@
           </el-upload>
         </div>
         <div class="divider lg:divider-horizontal"></div>
+        <!-- 文件类型筛选列表 -->
         <div class="bg-gray-200 flex gap-1 p-1">
           <div
               v-for="(value,key,index) in filterDic"
@@ -243,7 +245,7 @@
 import { ref, reactive, onMounted, watch, inject } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { request } from "../../apis/request";
-import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, filterFileTypeAPI, getDirStructureAPI } from "../../apis"
+import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, getFileListByTypeAPI, getDirStructureAPI } from "../../apis"
 import { ElNotification, ElMessage } from 'element-plus'
 import { displayFile, myMenu, recycleBinDia, myCollectionDia, shareLinkDia } from "../../components"
 import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
@@ -291,7 +293,7 @@ const fileInfoList = reactive([]);
 interface Path{
   [key: string] : number;
 }
-const nowPath = ref<Array<Path>>([{'Home': 0},])    // 当前的绝对路径
+const nowPath = ref<Array<Path>>([{'我的网盘': 0},])    // 当前的绝对路径
 
 watch(()=>nowPath.value,()=>{
   if(nowPath.value.length){
@@ -322,8 +324,11 @@ watch(()=>isShowMenu.value,(newValue,oldValue)=>{
 const searchKeyWord = ref<string|null>('');     // 搜索文件关键字
 
 watch(()=>searchKeyWord.value,(newValue,oldValue)=>{
+  filterCho.value = 0
   run()
 })
+
+const searchRes = ref<Array<object>>([])    // 存储搜寻结果
 
 const selectMask = ref<HTMLElement | null>(null)    // 拖动选择文件的框
 const isStartSelect =  ref<boolean>(false)
@@ -335,7 +340,7 @@ const selectMaskOldPos = ref({
 const dirStructure = ref<Array<object>>([])     // 在目录区显示目录结构的
 
 const moveFileOlds = ref<Array<object>>([])   // 用于返回上级目录
-const moveFileNow = ref<object>({'Home':0})    // 搜索文件对话框中的当前目录
+const moveFileNow = ref<object>({'我的网盘':0})    // 搜索文件对话框中的当前目录
 const moveFileDirStruct = ref<Array<object>>([])    // 搜索文件对话框中的目录结构
 const moveFileSelectId = ref<number>(0)
 const moveFilePath = ref<string>('')      // 支持直接输入路径进行移动
@@ -467,7 +472,7 @@ const getFileIconInd = (type) => {
 }
 
 const getFileList = () => {
-  if(filterCho.value === 0){
+  // if(filterCho.value === 0){
     useRequest(()=>getFileListAPI({
       parent_id: Object.values(nowPath.value[nowPath.value.length-1])[0],
       page_num: pageInfo['page_num'],
@@ -491,22 +496,54 @@ const getFileList = () => {
         }
       }
     })
-  }else{
-    // useRequest(()=>filterFileTypeAPI({
-    //   file_type: filterCho.value,
-    //   page_num: pageInfo['page_num'],
-    //   page_size: pageInfo['page_size']
-    // }))
-  }
+  //  }else{
+  //   useRequest(()=>getFileListByTypeAPI(localStorage.getItem('token'),{
+  //     file_type: filterCho.value,
+  //     page_num: pageInfo['page_num'],
+  //     page_size: pageInfo['page_size']
+  //   }))
+  // }
 }
 
-const expandDirectory = () => {
-  if(isExpand.value) isExpand.value = false;
-  else isExpand.value = true;
+const getFileListByType = () => {
+  useRequest(()=>getFileListByTypeAPI(localStorage.getItem('token'),{
+    file_type: filterCho.value,
+    page_num: pageInfo['page_num'],
+    page_size: pageInfo['page_size']
+  }),{
+    onBefore(){
+      fileList.value = []
+      selectedFileNum.value = 0
+      selectedFilesInd.value = []
+
+      nowPath.value = [{'我的网盘':0}]
+      let key = Object.keys(filterDic)[filterCho.value]
+      let o = {}
+      o[key] = -20
+      nowPath.value.push(o)
+    },
+    onSuccess(res){
+      if(res['code']===200){
+        if(res['data']['file_list']){
+            fileList.value = res['data']['file_list']
+        }
+        pageInfo.total_num = res['data']['total_num']
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
 }
 
 const changeFilter = (ind) => {
   filterCho.value = ind;
+  if(filterCho.value !== 0){
+    getFileListByType()
+  }
+  else{
+    nowPath.value = [{'我的网盘':0}]
+    getFileList()
+  }
 }
 
 const handleSizeChange = (newPageSize) => {
@@ -550,7 +587,7 @@ const closeMenu = () => {
   window.removeEventListener('scroll', closeMenu);
 }
 
-const getDirStructure = (parent_id,purDic) => {
+const getDirStructure = (parent_id,purDic) => {   // 获取 parent_id 下的目录结构，存放到 purDic 中
   useRequest(()=>getDirStructureAPI({parent_id: parent_id}),{
     onSuccess(res){
       if(res['code']===200){
@@ -577,6 +614,8 @@ const endRenaming = (newName) => {
           fileList.value[renameFileInd.value]['name'] = newName
           ElMessage({message: '修改成功', type: 'success',})
           renameFileInd.value = -1;
+          // 更新目录结构树
+          getDirStructure(nowPath.value[nowPath.value.length-1][Object.keys(nowPath.value[nowPath.value.length-1])[0]],dirStructure);
         }else{
           ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
         }
@@ -605,6 +644,7 @@ const createDir = async () => {
     onSuccess: async (res) => {
       if(res['code']===200){
         pageInfo.total_num++;
+        getDirStructure(nowPath.value[nowPath.value.length-1][Object.keys(nowPath.value[nowPath.value.length-1])[0]],dirStructure);
         if(pageInfo.total_num > pageInfo.page_size){
           handleCurrentChange(Math.floor(pageInfo.total_num / pageInfo.page_size) + 1)
         }else{
@@ -635,7 +675,7 @@ const deleteFile = () => {
       if(res['code']===200){
         fileList.value = []
         getFileList()
-
+        getDirStructure(nowPath.value[nowPath.value.length-1][Object.keys(nowPath.value[nowPath.value.length-1])[0]],dirStructure);
         selectedFilesInd.value = [];
         selectedFileNum.value = 0
         ElMessage({message: '删除成功', type: 'success',})
@@ -702,22 +742,28 @@ const uploadFile = (uploadFile,uploadFiles) => {
 
 const changeDirectory = (ind) => {
   if(fileList.value[ind]['file_type']==='文件夹'){
-    selectedFileNum.value = 0
+    selectedFileNum.value = 0   // 取消选中
     selectedFilesInd.value.splice(0,selectedFilesInd.value.length)
 
-    let pathNode = {}
+    let pathNode = {}   // 保存目标路径
     pathNode[fileList.value[ind]['name']] = fileList.value[ind]['id']
     nowPath.value.push(pathNode)
-    getFileList();
+    getFileList();    // 访问
   }
 }
 
 const backToDirectory = (ind) => {
-  if(Object.keys(nowPath.value[ind])[0]==='Search' && nowPath.value[ind][Object.keys(nowPath.value[ind])[0]] === 0){
-    nowPath.value = [{"Home":0}]
-    getFileList();
-    searchKeyWord.value = ''
-  }else{
+  if(Object.keys(nowPath.value[ind])[0]==='Search' && nowPath.value[ind][Object.keys(nowPath.value[ind])[0]] === -10){
+    // 会到搜索页面
+    nowPath.value = [{"我的网盘":0},{'Search':-10}]
+    fileList.value = searchRes.value
+  }
+  else if(nowPath.value[ind][Object.keys(nowPath.value[ind])[0]] === -20)
+  {
+    return    // 如果是文件类型筛选，则不做任何事情
+  }
+  else{
+    filterCho.value = 0
     nowPath.value.splice(ind+1,nowPath.value.length)
     getFileList();
   }
@@ -755,6 +801,7 @@ const moveFile = (ids:Array<number>,parent_id:number) => {
       if(res['code']===200){
         ElMessage({message: '移动成功', type: 'success',})
         fileList.value = fileList.value.filter((val)=>!ids.includes(val['id']))
+        getDirStructure(nowPath.value[nowPath.value.length-1][Object.keys(nowPath.value[nowPath.value.length-1])[0]],dirStructure);
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
@@ -800,13 +847,24 @@ const { data, run } = useRequest(()=>searchFileAPI(searchKeyWord.value),{
   manual: true,
   onSuccess(res){
     if(res['code']===200){
-      if(searchKeyWord.value!==''){       // 判断是清空搜索，还是搜索内容
-        nowPath.value = [{'Search': 0}]
-      }else{
-        nowPath.value = [{'Home': 0}]
+      if(!res['data']){   // 搜索不到结果
+        fileList.value = []
+        return
       }
-      if(fileList.value.toString() !== res['data'].toString()){
-        fileList.value = res['data']  // 防止通过点击路径栏返回Home时，页面多闪一下
+      if(searchKeyWord.value!==''){       // 判断是清空搜索，还是搜索内容
+        nowPath.value = [{'我的网盘':0},{'Search': -10}]
+      }else{
+        nowPath.value = [{'我的网盘': 0}]
+      }
+      if(fileList.value.toString() !== res['data'].toString()){   // 防止通过点击路径栏返回我的网盘时，页面多闪一下
+        fileList.value = []
+        searchRes.value = []
+
+        let len = res['data'].length > pageInfo.page_size ? pageInfo.page_size : res['data'].length
+        for(let i=0; i<len; i++){
+          fileList.value.push(res['data'][i])
+        }
+        searchRes.value = fileList.value
       }
     }else{
       ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
@@ -826,12 +884,16 @@ const restoreFile = () => {
 }
 
 const changeDirectory_2 = (value) => {    // 目录区域的切换
-  for(let i=0; i<fileList.value.length; i++){
-    if(fileList.value[i]['id']===value['id']){
-      changeDirectory(i);
-      break
-    }
-  }
+  // for(let i=0; i<fileList.value.length; i++){
+  //   if(fileList.value[i]['id']===value['id']){
+  //     changeDirectory(i);
+  //     break
+  //   }
+  // }
+  let o = {}
+  o[value['name']] = value['id']
+  nowPath.value.push(o)
+  getFileList()
 }
 
 const openMoveFileDia = () => {
@@ -841,7 +903,7 @@ const openMoveFileDia = () => {
   }
   moveFileSelectId.value = 0
   moveFileOlds.value = [];
-  moveFileNow.value = {'Home':0}
+  moveFileNow.value = {'我的网盘':0}
   getDirStructure(0,moveFileDirStruct)
   moveFileDia.showModal()
 }

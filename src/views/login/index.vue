@@ -76,13 +76,11 @@ const login = () => {
         localStorage.setItem("token",res['data']['token']);
         loginstore.setLogin(true);
 
-        setTimeout(()=>{
-          getUserInfo();  // 获取用户信息
+        getUserInfo();  // 获取用户信息
 
-          router.push("/chat");
+        router.push("/chat");
 
-          ElNotification({title: 'Success', message: '登录成功', type: 'success',})
-        },0)
+        ElNotification({title: 'Success', message: '登录成功', type: 'success',})
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
@@ -94,7 +92,7 @@ const login = () => {
 }
 
 const getUserInfo = () => {
-  useRequest(()=>getUserInfoAPI(),{
+  useRequest(()=>getUserInfoAPI(localStorage.getItem('token')),{
     onSuccess(res){
       if(res['code']===200){
         userinfostore.setInfo(res['data']);

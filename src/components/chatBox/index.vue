@@ -1,5 +1,5 @@
 <template>
-<div id="container" class="fixed bottom-0" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
+<div id="container" class="fixed bottom-0 flex flex-col" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
   <!-- 聊天框 -->
   <div
       id="chatBox"
@@ -16,12 +16,25 @@
           </div>
         </div>
         <div class="chat-bubble" :class="[chatMsg[index]['role'] === 'user' ? 'bg-blue-700 text-base-100' : 'bg-base-100 text-base-content']">
-          {{ chatMsg[index]['message'] }}
+          <!-- 渲染markdown格式 -->
+          <div v-html="converter.makeHtml(chatMsg[index]['message'])" class="w-full">
+          </div>
         </div>
+      </div>
+      <!-- 教案的导出与修改按钮 -->
+      <div v-if="value['message_type']===3" class="w-full flex justify-center gap-8 mt-4">
+        <button @click="exportLessonPlan(value['id'])" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出教案</button>
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改教案</button>
+      </div>
+    </div>
+    <!-- 推荐提问 -->
+    <div v-if="isShowRecom" class="flex flex-col gap-6 mt-4">
+      <div v-for="(value,index) in recommendQues">
+        <span @click="sendMsgRec(value)" class="p-2 border-2 bg-base-100 rounded-2xl hover:cursor-pointer hover:bg-base-200">{{ value }}</span>
       </div>
     </div>
     <!-- 加载图标-->
-    <div v-show="isWaitingRes" class="mt-2 mb-4 gap-1 flex justify-center" :class="[props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]']">
+    <div v-show="isWaitingRes" class="mt-4 mb-2 gap-1 flex justify-center" :class="[props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]']">
       <span class="loading loading-dots loading-xs"></span>
       <span class="loading loading-dots loading-sm"></span>
       <span class="loading loading-dots loading-md"></span>
@@ -45,9 +58,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useRequest } from "vue-hooks-plus";
-import { getChatHistoryAPI, sendMsgAPI } from "../../apis";
+import { exportLessonPlanAPI, getChatHistoryAPI, sendMsgAPI, getLessonPlanInfoAPI, modifyLessonPlanAPI } from "../../apis";
 import { ElMessage, ElNotification } from 'element-plus';
 import { useMainStore } from "../../stores";
+import * as showdown from "showdown"
+
+const converter = new showdown.Converter()
+converter.setOption("tables",true);
 
 const userinfostore = useMainStore().userInfoStore();
 
@@ -56,7 +73,13 @@ const textInput = ref<string>("");    // 文本框
 const chatMsg = ref([]);    // 记录
 const resMsg = ref<string>('')    // 用于实现打字效果
 
-const isWaitingRes = ref<boolean>(false)
+const isWaitingRes = ref<boolean>(false)    // 当前是否正在等待响应
+
+watch(()=>isWaitingRes.value,()=>{
+  if(isWaitingRes.value === true){
+    isShowRecom.value = false;
+  }
+})
 
 const props = defineProps(['id','isOpenFuncForm','isWaitRes','lessonPlanRes']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
 
@@ -86,13 +109,15 @@ const pageInfo = ref<object>({  // 滚动加载（还未实现）
   page_size: 10,
 })
 
-const originHeight = ref<number>(0);
+const originHeight = ref<number>(0);    // container的高度，
 
 const textArea = ref<HTMLElement>()    // 文本框DOM元素
-const textAreaOldH = ref<number>()   // 文本框的高度
 
 const windowScrollY = ref<number>(-1);  // 页面滚动条距离顶端的长度
 const oldScrollY = ref<number>(-1);
+
+const recommendQues = ref<Array<string>>([])
+const isShowRecom = ref<boolean>(false)   // 希望在打字效果后显示
 
 watch(()=>windowScrollY.value,()=>{
   let container = document.getElementById('container')
@@ -120,7 +145,11 @@ onMounted(()=>{
   setTextArea()   // 监听文本框的高度变化
 })
 
-const sendMsg = () => {
+const sendMsg = () => {     // 发送信息
+  if(isWaitingRes.value ===true){
+    ElMessage({message: '当前正在等待回答！', type: 'warning',})
+    return
+  }
   if(props.id === -1) return
   if(textInput.value === '' || textInput.value === '\n'){
     textInput.value = ''
@@ -133,6 +162,7 @@ const sendMsg = () => {
   }),{
     onBefore(){
       isWaitingRes.value = true
+      isShowRecom.value = false
       chatMsg.value.push({
         role: 'user',
         message: textInput.value,
@@ -150,6 +180,10 @@ const sendMsg = () => {
         })
         resMsg.value = res['data']['message']
         print()
+        recommendQues.value = []
+        recommendQues.value.push(res['data']['follow_1'])
+        recommendQues.value.push(res['data']['follow_2'])
+        recommendQues.value.push(res['data']['follow_3'])
       }else{
         getChatHistory()
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
@@ -169,6 +203,8 @@ const sendMsg = () => {
 const print = () => {   // 通过chatMsg与resMsg实现打字效果
   let chatBox = document.getElementById("chatBox");
   if( chatMsg.value[chatMsg.value.length-1]['message'].length >= resMsg.value.length){
+    getChatHistory();
+    isShowRecom.value = true
     return
   }
   setTimeout(()=>{
@@ -185,7 +221,7 @@ const print = () => {   // 通过chatMsg与resMsg实现打字效果
   },50)
 }
 
-const getChatHistory = () => {
+const getChatHistory = () => {    // 获取会话记录
   if(props.id === -1) return
   useRequest(()=>getChatHistoryAPI({
     id:props.id,
@@ -200,6 +236,7 @@ const getChatHistory = () => {
             chatMsg.value.push(res['data']['chat_history'][i]);
           }
         }
+        console.log(chatMsg.value)
         nextTick(()=>{
           let chatBox = document.getElementById("chatBox");
           chatBox.scrollTop = chatBox.scrollHeight
@@ -214,43 +251,21 @@ const getChatHistory = () => {
   })
 }
 
-const enterKeyDown = (e) => {
+const enterKeyDown = (e) => {     // 文本框的换行与发送
   if(e.ctrlKey && e.keyCode==13) {    //用户点击了ctrl+enter触发
     let textarea = document.getElementById('textArea') as HTMLTextAreaElement
     textarea.value += '\n';
-  }else {       //用户点击了enter触发
+  }else {     //用户点击了enter触发
     sendMsg()
   }
 }
 
-const setTextArea = () => {
+const setTextArea = () => {   // 设置文本区域
   const observe = (element, event, handler) => {
     element.addEventListener(event, handler, false);
   };
 
   textArea.value = document.getElementById('textArea')
-  nextTick(()=>{
-    textAreaOldH.value = Number(textArea.value.style.height.split('px')[0])
-  })
-
-  const observer = new MutationObserver((mutationsList) => {    // 监听文本框的变化，改变对话框的高度
-    for (const mutation of mutationsList) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-        let chatBox = document.getElementById('chatBox');
-        const newHeight = textArea.value.offsetHeight;
-        if (newHeight !== textAreaOldH.value) {
-          let dH = newHeight - textAreaOldH.value;
-          if (chatBox && chatBox.style.height) {
-          }
-          textAreaOldH.value = newHeight; // 更新初始高度
-        }
-      }
-    }
-  });
-
-  observer.observe(textArea.value, {
-    attributes: true, // 监听属性变化
-  });
 
   function resize(){  // 监听文本框的高度并进行滚动条的调整，同时修改对话框的高度
     textArea.value.style.height = 'auto';
@@ -277,6 +292,52 @@ const setTextArea = () => {
 
 const handleScroll = () => {
   windowScrollY.value = window.scrollY
+}
+
+const exportLessonPlan = (id) => {    // 导出教案
+  useRequest(()=>exportLessonPlanAPI(localStorage.getItem('token'),{message_id:id}),{
+    onSuccess(res){
+      console.log(res)
+      if(res['code']===200){
+        downloadFileByUrl(res['data']['url'])
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
+}
+
+const downloadFileByUrl = (url:string) => {
+  let fileUrl =  url
+  let fileName = fileUrl.substring( fileUrl.lastIndexOf("/")+1 );
+
+  const link = document.createElement('a');
+  link.download = fileName;  // 指定下载文件的名称
+  link.href = fileUrl;
+  link.target = "_blank"
+  link.style.display = "none"          // 这个元素不用呈现在页面上，隐藏掉。
+
+  document.body.appendChild( link );
+  link.click();
+
+  document.body.removeChild( link );   // 防止多次下载
+}
+
+const getLessonPlanInfo = (id) => {
+  useRequest(()=>getLessonPlanInfoAPI(localStorage.getItem('token'),{message_id:id}),{
+    onSuccess(res){
+      if(res['code']===200){
+
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    }
+  })
+}
+
+const sendMsgRec = (text) => {
+  textInput.value = text
+  sendMsg()
 }
 </script>
 

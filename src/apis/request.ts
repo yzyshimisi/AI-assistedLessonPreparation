@@ -1,8 +1,8 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 
 const axiosInstance = axios.create({
-    baseURL: '/api',
-    timeout: 30000,
+    baseURL: '/',
+    timeout: 60000,
 })
 
 const request = <ResponseType = unknown>(

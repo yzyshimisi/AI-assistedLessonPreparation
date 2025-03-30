@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import { onMounted, ref, watch } from "vue";
 import { obtainClassListAPI, getAverageGpaAPI, getScoreOverviewAPI, getAcademicAchieveAPI } from "../../apis"
 import { useRequest } from "vue-hooks-plus/es";
 import echarts from "../../echarts";
@@ -89,13 +89,13 @@ const SCORE_OVERVIEW = {    // 成绩概况的映射
 }
 
 const classList = ref<Array<string>>([])    // 班级选择
-const choClassInd = ref<number>(0)
-const showClassInd = ref<number>(0)
+const choClassInd = ref<number>(-1)
+const showClassInd = ref<number>(-1)
 
 const YEAR = ref<Array<number>>([])     // 学年
-const choYearInd = ref<number>(0)
+const choYearInd = ref<number>(-1)
 
-const choTerm = ref<number>(2);     // 学期
+const choTerm = ref<number>(-1);     // 学期
 
 const averageGpa = ref<number>(-1);     // 平均绩点
 const courseAverageScore = ref<Array<Object>>([])   // 课程的平均成绩
