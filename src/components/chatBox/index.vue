@@ -1,9 +1,9 @@
 <template>
-<div id="container" class="fixed bottom-0 flex flex-col" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
+<div id="container" class="fixed bottom-[20px]" :class="props['isOpenFuncForm'] ? 'ml-[40px]' : 'ml-[100px]'">
   <!-- 聊天框 -->
   <div
       id="chatBox"
-      class="h-[82%] bg-base-300 overflow-y-scroll px-5 py-8"
+      class="bg-base-300 overflow-y-scroll mt-4 px-5 py-8"
       :class="[props['isOpenFuncForm'] ? 'w-[52vw]' : 'w-[59vw]']"
   >
     <div v-for="(value,index) in chatMsg" class="mb-2">
@@ -109,9 +109,10 @@ const pageInfo = ref<object>({  // 滚动加载（还未实现）
   page_size: 10,
 })
 
-const originHeight = ref<number>(0);    // container的高度，
+const originHeight = ref<number>(0);    // chatBox的高度（不考虑滚动条，考虑文本输入框）
 
 const textArea = ref<HTMLElement>()    // 文本框DOM元素
+const textAreaOldH = ref<number>(-1);
 
 const windowScrollY = ref<number>(-1);  // 页面滚动条距离顶端的长度
 const oldScrollY = ref<number>(-1);
@@ -120,22 +121,23 @@ const recommendQues = ref<Array<string>>([])
 const isShowRecom = ref<boolean>(false)   // 希望在打字效果后显示
 
 watch(()=>windowScrollY.value,()=>{
-  let container = document.getElementById('container')
+  let chatBox = document.getElementById('chatBox')
   let scrollTop = windowScrollY.value <= 145 ?  windowScrollY.value : 145
 
-  container.style.height = (originHeight.value + scrollTop).toString().concat('px')   // 聊天框加上对应的高度
+  chatBox.style.height = (originHeight.value + scrollTop).toString().concat('px')   // 聊天框加上对应的高度
 
   oldScrollY.value = windowScrollY.value
 })
 
 onMounted(()=>{
-  // 初始化容器的高度
-  originHeight.value = window.innerHeight - 75 - 65 - 4 - 20
-  let container = document.getElementById('container')
-  container.style.height = originHeight.value.toString().concat('px')   // 初始高度：首图、导航栏、mt-1
+  // 初始化聊天框的高度
+  originHeight.value = window.innerHeight - 75 - 65 - 4 - 20 - 110
+  let chatBox = document.getElementById('chatBox')
+  chatBox.style.height = originHeight.value.toString().concat('px')   // 初始高度：首图、导航栏、mt-1
 
   nextTick(()=>{    // 当页面加载好后，处理一次滚动条的事件，避免在滚动条中间刷新页面时，造成的高度错误
     handleScroll()
+    textAreaOldH.value = document.getElementById('textArea').offsetHeight
   })
 
   getChatHistory();
@@ -288,6 +290,28 @@ const setTextArea = () => {   // 设置文本区域
   observe(textArea.value, 'keydown', delayedResize);
 
   resize();
+
+  // 监听高度变化，并更改聊天框的高度
+  let mutationObserver = new MutationObserver(function (mutations) {
+    let height = Number(window.getComputedStyle(textArea.value).getPropertyValue('height').split('px')[0]);
+    if (height !== textAreaOldH.value) {
+      let dH = textAreaOldH.value - height
+
+      let chatBox = document.getElementById('chatBox')
+      chatBox.style.height = (chatBox.offsetHeight + dH).toString().concat('px')  // 实时修改
+
+      originHeight.value = originHeight.value + dH    // 适配滚动条
+
+      textAreaOldH.value = height
+    }
+  })
+
+  mutationObserver.observe(textArea.value, {
+    childList: true, // 子节点的变动（新增、删除或者更改）
+    attributes: true, // 属性的变动
+    characterData: true, // 节点内容或节点文本的变动
+    subtree: true // 是否将观察器应用于该节点的所有后代节点
+  })
 }
 
 const handleScroll = () => {

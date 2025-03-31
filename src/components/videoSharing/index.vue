@@ -33,7 +33,7 @@
               </div>
               <p class="ml-4 font-bold text-sm">{{ value['username'] }}</p>
             </div>
-            <p class="w-full text-center font-bold text-2xl ml-6 w-[40%] truncate">{{ value['title'] }}</p>
+            <div class="w-full flex justify-center"><p class="font-bold text-2xl ml-6 w-[40%] truncate">{{ value['title'] }}</p></div>
             <div @click="viewDetails(index)" class="absolute right-[20px]"><button @click="isShowPublishCoursewareForm=false" class="btn btn-outline btn-sm border-2 border-purple-950 text-purple-950 bg-[#f3f1ff] hover:text-purple-950 hover:bg-[#f3f1ff] px-5 rounded-xl">查看详情</button></div>
           </div>
           <img :src="value['cover_img']" class="mt-4 max-h-[250px]">

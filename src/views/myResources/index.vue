@@ -17,7 +17,7 @@
     <div class="absolute bottom-[50px] w-[155px] flex flex-col gap-2">
       <div style="border-bottom: 1px solid #000000;" class="w-[155px]"></div>
       <li @click="openMyCollection" onclick="myCollectionDia.showModal()"><a><el-icon><Star /></el-icon>我的收藏</a></li>
-      <li><a><el-icon><Share /></el-icon>分享链接</a></li>
+      <li onclick="shareLinkListDia.showModal()"><a><el-icon><Share /></el-icon>分享链接</a></li>
       <li @click="openRecycleBin" onclick="recycleBinDia.showModal()"><a><el-icon><Delete /></el-icon>回收站</a></li>
       <div style="border-bottom: 1px solid #000000;" class="w-[155px]"></div>
     </div>
@@ -77,7 +77,8 @@
         </label>
       </div>
       <div class="divider"></div>
-      <div class="flex items-center gap-2 relative">
+      <!-- 操作列表 -->
+      <div class="flex items-center gap-2 relative select-none">
         <div><img src='/myResources/multiChoice/multiCho.png'></div>
         <span>已选 {{selectedFileNum}} 项</span>
         <div class="bg-violet-200 flex items-center gap-2 text-sm rounded-2xl p-2">
@@ -200,6 +201,7 @@
     :selectedFilesInd="selectedFilesInd"
 >
 </shareLinkDia>
+<shareLinkListDia :parent_id="Object.values(nowPath[nowPath.length-1])[0]"></shareLinkListDia>
 <dialog id="moveFileDia" class="modal">      <!-- 移动文件对话框 -->
   <div class="modal-box">
     <form method="dialog">
@@ -247,7 +249,7 @@ import { useRequest } from "vue-hooks-plus";
 import { request } from "../../apis/request";
 import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, getFileListByTypeAPI, getDirStructureAPI } from "../../apis"
 import { ElNotification, ElMessage } from 'element-plus'
-import { displayFile, myMenu, recycleBinDia, myCollectionDia, shareLinkDia } from "../../components"
+import { displayFile, myMenu, recycleBinDia, myCollectionDia, shareLinkDia, shareLinkListDia } from "../../components"
 import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 
 const avatarUrls = [
@@ -666,6 +668,10 @@ const createDir = async () => {
 }
 
 const deleteFile = () => {
+  if(selectedFileNum.value === 0){
+    ElMessage({message: '请先选择至少一个文件！', type: 'warning',})
+    return
+  }
   const ids = []
   for(let i=0;i<selectedFilesInd.value.length;i++){
     ids.push(fileList.value[selectedFilesInd.value[i]]['id'])
@@ -793,6 +799,9 @@ const collectFile = () => {
 }
 
 const moveFile = (ids:Array<number>,parent_id:number) => {
+  if(selectedFileNum.value === 0){
+    return
+  }
   useRequest(()=>moveFileAPI({
     ids: ids,
     parent_id: parent_id,
@@ -813,6 +822,7 @@ const handleDragStart = (event,ind) => {    // 拖动文件
   event.dataTransfer.setData('index',ind);
 }
 const handleDrop = (event,ind) => {   // 释放拖动的文件
+  console.log(ind)
 
   event.preventDefault();
   const sourceInd = event.dataTransfer.getData('index')

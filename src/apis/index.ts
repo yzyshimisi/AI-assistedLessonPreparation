@@ -63,6 +63,7 @@ import oneClickTransferAPI from "./Server/sourceMaterial/oneClickTransferAPI";
 import exportLessonPlanAPI from "./Server/lessonPlanDesign/exportLessonPlanAPI";
 import getLessonPlanInfoAPI from "./Server/lessonPlanDesign/getLessonPlanInfoAPI";
 import modifyLessonPlanAPI from "./Server/lessonPlanDesign/modifyLessonPlanAPI";
+import getShareLinkListAPI from "./Server/myResources/getShareLinkListAPI";
 
 export {
     loginAPI,
@@ -130,4 +131,5 @@ export {
     exportLessonPlanAPI,
     getLessonPlanInfoAPI,
     modifyLessonPlanAPI,
+    getShareLinkListAPI,
 }

@@ -21,6 +21,7 @@ import materialMenu from "./materialMenu/index.vue";
 import experienceDiscuss from "./experienceDiscuss/index.vue";
 import coursewareSharing from "./coursewareSharing/index.vue";
 import videoSharing from "./videoSharing/index.vue";
+import shareLinkListDia from "./shareLinkListDia/index.vue";
 
 export {
     chatBox,
@@ -46,4 +47,5 @@ export {
     experienceDiscuss,
     coursewareSharing,
     videoSharing,
+    shareLinkListDia,
 }
