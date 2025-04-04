@@ -1,8 +1,6 @@
 import { request } from "../../request";
 
-const token = localStorage.getItem('token')
-
-const getSubjectListAPI = async () => {
+const getSubjectListAPI = async (token:string) => {
     return request('/api/share/course_list',{
         method: "get",
         headers: {"Content-Type":"application/json", 'Authorization':`Bearer ${token}`},

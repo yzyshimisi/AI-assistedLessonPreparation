@@ -15,10 +15,27 @@
                 :src="[chatMsg[index]['role'] === 'user' ? userinfostore.userInfo.avatar : '/aichat/aiAvatar.png']" />
           </div>
         </div>
-        <div class="chat-bubble" :class="[chatMsg[index]['role'] === 'user' ? 'bg-blue-700 text-base-100' : 'bg-base-100 text-base-content']">
+        <!-- 正常信息 -->
+        <div v-if="value['message_type'] !== 5" class="chat-bubble" :class="[chatMsg[index]['role'] === 'user' ? 'bg-blue-700 text-base-100' : 'bg-base-100 text-base-content']">
           <!-- 渲染markdown格式 -->
           <div v-html="converter.makeHtml(chatMsg[index]['message'])" class="w-full">
           </div>
+        </div>
+        <!-- 知识图谱 -->
+        <div v-else class="chat-bubble bg-base-100 text-base-content w-[700px] h-[530px]">
+          <RelationGraph @click="nowShowDetailNodeID=''" :ref="(el) => setGraphRef(el)" :options="options">
+            <template #node="{ node }">
+              <div @contextmenu="showNodeDetail(node.id)" class="my-node flex flex-col gap-[40px]">
+                <div class="my-node-text w-full text-center truncate">{{ node.text }}</div>
+                <div
+                    class="my-node-detail"
+                    v-if="node.text && nowShowDetailNodeID===node.id"
+                >
+                  <div @dblclick="" @click.stop>{{ node.text }}</div>
+                </div>
+              </div>
+            </template>
+          </RelationGraph>
         </div>
       </div>
       <!-- 教案的导出与修改按钮 -->
@@ -58,12 +75,60 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useRequest } from "vue-hooks-plus";
-import { exportLessonPlanAPI, getChatHistoryAPI, sendMsgAPI, getLessonPlanInfoAPI, modifyLessonPlanAPI } from "../../apis";
+import {
+  exportLessonPlanAPI,
+  getChatHistoryAPI,
+  sendMsgAPI,
+  getLessonPlanInfoAPI,
+  modifyLessonPlanAPI,
+  getLessonPreGraphAPI
+} from "../../apis";
 import { ElMessage, ElNotification } from 'element-plus';
 import { useMainStore } from "../../stores";
 import * as showdown from "showdown"
+import RelationGraph from 'relation-graph-vue3'
 
-const converter = new showdown.Converter()
+const graphRef$ = ref<RelationGraph>()
+const options = {
+  "backgroundImage": "",
+  "backgroundImageNoRepeat": true,
+  "allowAutoLayoutIfSupport": false,
+  "allowShowDownloadButton": false,
+  "defaultExpandHolderPosition": "right",
+  "defaultLineWidth": 5,
+  "layouts": [
+    {
+      "label": "中心",
+      "layoutName": "center",
+      "centerOffset_x": 0,
+      "centerOffset_y": 0,
+      "distance_coefficient": 1
+    }
+  ]
+}
+
+const jsonData = {
+  rootId: 'a',
+  nodes: [
+    { id: 'a', text: 'a', },
+    { id: 'b', text: 'b', },
+    { id: 'c', text: 'c', },
+    { id: 'd', text: 'd', },
+    { id: 'e', text: 'e', },
+    { id: 'f', text: 'f', },
+  ],
+  lines: [
+    { from: 'a', to: 'b', },
+    { from: 'a', to: 'c', },
+    { from: 'a', to: 'd', },
+    { from: 'a', to: 'e', },
+    { from: 'a', to: 'f', },
+  ],
+}
+
+const varemit = defineEmits(["endGetKnowledgeGraph"])
+
+const converter = new showdown.Converter()  // 将markdown转为html
 converter.setOption("tables",true);
 
 const userinfostore = useMainStore().userInfoStore();
@@ -81,7 +146,7 @@ watch(()=>isWaitingRes.value,()=>{
   }
 })
 
-const props = defineProps(['id','isOpenFuncForm','isWaitRes','lessonPlanRes']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
+const props = defineProps(['id','isOpenFuncForm','isWaitRes','lessonPlanRes','getKnowledgeGraph']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
 
 watch([()=>props.isWaitRes],()=>{
   if(props.isWaitRes === true){
@@ -128,6 +193,21 @@ watch(()=>windowScrollY.value,()=>{
 
   oldScrollY.value = windowScrollY.value
 })
+
+const nodes = ref<Array<object>>([])    // 显示知识图谱数据
+const relationships = ref<Array<object>>([])
+
+watch(()=>props.getKnowledgeGraph,()=>{
+  if(props.getKnowledgeGraph && !isWaitingRes.value){
+    chatMsg.value.push({'role':"user", 'message':'查看备课知识图谱'})
+    isWaitingRes.value = true
+    getLessonPreGraph()
+  }else{
+    varemit('endGetKnowledgeGraph')
+  }
+})
+
+const knowledgeGraphInfo = ref<object>({})
 
 onMounted(()=>{
   // 初始化聊天框的高度
@@ -363,6 +443,101 @@ const sendMsgRec = (text) => {
   textInput.value = text
   sendMsg()
 }
+
+const getLessonPreGraph = () => {   // 获取备课资料的知识图谱
+  useRequest(()=>getLessonPreGraphAPI(localStorage.getItem('token')),{
+    onSuccess(res){
+      if(res['code']===200){
+        chatMsg.value.push({'role':'ai', 'message_type':5})
+        nodes.value = res['data']['nodes']
+        relationships.value = res['data']['relationships']
+        isWaitingRes.value = false
+        drawKnowledgeGraph()
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',});
+      }
+    },
+    onFinally(){
+      varemit('endGetKnowledgeGraph')
+    }
+  })
+}
+
+const drawKnowledgeGraph = async () => {
+  let jsonData: KnowledgeGraphType = {
+    nodes: [],
+    lines: [],
+  }
+  let processNode = []
+  let lines = []
+
+  for(let i=0; i<nodes.value.length; i++){    // 提取节点信息
+    let o = {}
+    o['id'] = nodes.value[i]['element_id']
+
+    if(nodes.value[i]['labels'][0] === 'Document')
+    {
+      o['text'] = nodes.value[i]['properties']['fileName']
+    }
+    else if(nodes.value[i]['labels'][0] === 'Chunk')
+    {
+      o['text'] = nodes.value[i]['properties']['text']
+      o['nodeShape'] = '1'
+      o['width'] = 150
+      o['height'] = 100
+    }
+    else if(nodes.value[i]['labels'][0] === "__Entity__")
+    {
+      o['text'] = nodes.value[i]['properties']['id']
+    }else{
+      console.log(nodes.value[i])
+    }
+
+    processNode.push(o)
+  }
+  for(let i=0; i<relationships.value.length; i++){
+    let o = {}
+    o['from'] = relationships.value[i]['start_node_element_id']
+    o['to'] = relationships.value[i]['end_node_element_id']
+    lines.push(o)
+  }
+  jsonData['nodes'] = processNode
+  jsonData['lines'] = lines
+
+  await nextTick()
+  graphRef$.value.setJsonData(jsonData)
+}
+
+// const jsonData = {
+//   rootId: 'a',
+//   nodes: [
+//     { id: 'a', text: 'a', },
+//     { id: 'b', text: 'b', },
+//     { id: 'c', text: 'c', },
+//     { id: 'd', text: 'd', },
+//     { id: 'e', text: 'e', },
+//     { id: 'f', text: 'f', },
+//   ],
+//   lines: [
+//     { from: 'a', to: 'b', },
+//     { from: 'a', to: 'c', },
+//     { from: 'a', to: 'd', },
+//     { from: 'a', to: 'e', },
+//     { from: 'a', to: 'f', },
+//   ],
+// }
+
+const nowShowDetailNodeID = ref<string>('')
+
+const showNodeDetail = (id) => {
+  nowShowDetailNodeID.value = id
+}
+
+const setGraphRef = (el: RelationGraph) => {    // v-for + ref 的使用
+  if(el){
+    graphRef$.value = el
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -377,5 +552,51 @@ const sendMsgRec = (text) => {
 
   /* 适用于 IE 和 Edge */
   -ms-overflow-style: -ms-autohiding-scrollbar; /* 隐藏滚动条，但鼠标悬停时显示 */
+}
+
+.my-node {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  .my-node-detail {
+    display: block;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -50%;
+    width: 250px;
+    height: auto;
+    min-height: 60px;
+    line-height: 30px;
+    background: #fff;
+    padding: 10px 0;
+    border: 3px solid #f90;
+    color: #000;
+    z-index: 1;
+    font-size: 18px;
+    user-select: all;
+  }
+  //&:hover {
+  //  .my-node-detail {
+  //    display: block;
+  //    position: absolute;
+  //    left: 50%;
+  //    transform: translateX(-50%);
+  //    top: -50%;
+  //    width: 250px;
+  //    height: auto;
+  //    min-height: 60px;
+  //    line-height: 30px;
+  //    background: #fff;
+  //    padding: 10px 0;
+  //    border: 3px solid #f90;
+  //    color: #000;
+  //    z-index: 1;
+  //    font-size: 18px;
+  //    user-select: all;
+  //  }
+  //}
 }
 </style>

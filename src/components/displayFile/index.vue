@@ -77,6 +77,7 @@ const getFileIconInd = (type) => {
 
     case "pptx文件":
     case "ppt文件":
+    case "pdf文件":
       return 2
 
     case "docx文件":

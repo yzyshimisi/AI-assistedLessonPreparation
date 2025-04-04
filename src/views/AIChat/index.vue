@@ -29,8 +29,8 @@
       <div class="flex flex-col gap-2 mt-[80px]">
         <h2 class="card-title flex justify-center mb-1">快速功能</h2>
         <div style="border-bottom: 2px solid #000000;"></div>
-        <div v-for="(value,index) in funcList" @click="showFuncForms(index)">
-          <div class="hover:bg-base-300 hover:cursor-pointer rounded-md text-center py-1 px-4">{{ value }}</div>
+        <div v-for="(value,index) in funcList" @click="quickFun(index,value)">
+          <div class="hover:bg-base-300 hover:cursor-pointer rounded-md text-center py-1 px-4 truncate">{{ value }}</div>
           <div style="border-bottom: 1px solid #000000;" class="mt-2"></div>
         </div>
       </div>
@@ -59,6 +59,9 @@
         :isWaitRes="isWaitRes"
         :lessonPlanRes="lessonPlanRes"
         :isOpenFuncForm="nowFuncForms!==-1"
+        :getKnowledgeGraph="getKnowledgeGraph"
+
+        @endGetKnowledgeGraph="getKnowledgeGraph=false"
     ></chatBox>
   </div>
 </div>
@@ -139,12 +142,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick, watch, toRef } from "vue";
+import { ref, reactive, onMounted, nextTick, watch } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { getTopicListAPI } from "../../apis/";
 import { ElNotification, ElMessage } from 'element-plus';
 import { useMainStore } from "../../stores";
-import { deleteTopicAPI, modifyTitleAPI, createTopicAPI, searchTopicAPI } from "../../apis";
+import { deleteTopicAPI, modifyTitleAPI, createTopicAPI, searchTopicAPI, getLessonPreGraphAPI } from "../../apis";
 import router from "../../router";
 import { useRoute } from "vue-router";
 import { chatBox, dClickEdit, lessonPlanDesign } from "../../components";
@@ -168,6 +171,7 @@ const funcList = reactive([
     '说课稿设计',
     '一键生成PPT',
     '一键配图',
+    '查看知识图谱',
 ])
 const nowFuncForms = ref<number>(-1);
 
@@ -182,6 +186,8 @@ const isWaitRes = ref<boolean>(false);    // 用来在教案生成与聊天框�
 const lessonPlanRes = ref<string>('');
 
 const assistantRoleSrc= ref<string>('');
+
+const getKnowledgeGraph = ref<boolean>(false)
 
 onMounted(()=>{
   getTopicList()
@@ -299,7 +305,7 @@ const createTopic = () => {
     newTopicTitle.value = new Date().toLocaleString();
     console.log(newTopicTitle.value);
   }
-  useRequest(()=>createTopicAPI({topic:newTopicTitle.value}),{
+  useRequest(()=>createTopicAPI(localStorage.getItem('token'),{topic:newTopicTitle.value}),{
     onSuccess(res){
       if(res['code']===200){
         getTopicList()
@@ -329,12 +335,16 @@ const chooseTopic = (ind) => {
   nowTopicInd.value = ind;
 }
 
-const showFuncForms = (ind) => {
+const quickFun = (ind,val) => {   // 快速功能的执行函数
   if(nowTopicInd.value === -1){
     ElMessage({message: '请先选择一个会话', type: 'warning',})
     return
   }
-  nowFuncForms.value = ind
+  if(val==='查看知识图谱'){
+    getKnowledgeGraph.value = true
+  }else{
+    nowFuncForms.value = ind
+  }
 }
 
 const closeFuncForm = () => {

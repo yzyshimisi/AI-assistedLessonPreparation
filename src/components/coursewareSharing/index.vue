@@ -310,7 +310,7 @@ const viewDetails = (ind) => {
 }
 
 const getSubjectList = () => {
-  useRequest(()=>getSubjectListAPI(),{
+  useRequest(()=>getSubjectListAPI(localStorage.getItem('token')),{
     onSuccess(res){
       if(res['code']===200){
         subjectList.value = res['data']

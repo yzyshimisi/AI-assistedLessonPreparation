@@ -64,6 +64,8 @@ import exportLessonPlanAPI from "./Server/lessonPlanDesign/exportLessonPlanAPI";
 import getLessonPlanInfoAPI from "./Server/lessonPlanDesign/getLessonPlanInfoAPI";
 import modifyLessonPlanAPI from "./Server/lessonPlanDesign/modifyLessonPlanAPI";
 import getShareLinkListAPI from "./Server/myResources/getShareLinkListAPI";
+import getLessonPreGraphAPI from "./Server/knowledgeGraph/getLessonPreGraphAPI";
+import getTextbookResourcesListAPI from "./Server/sourceMaterial/textbookResources/getTextbookResourcesListAPI";
 
 export {
     loginAPI,
@@ -132,4 +134,6 @@ export {
     getLessonPlanInfoAPI,
     modifyLessonPlanAPI,
     getShareLinkListAPI,
+    getLessonPreGraphAPI,
+    getTextbookResourcesListAPI,
 }

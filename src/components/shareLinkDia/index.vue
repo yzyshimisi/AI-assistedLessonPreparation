@@ -37,6 +37,15 @@
     </div>
   </div>
 </dialog>
+<dialog id="showShareLinkDia" class="modal">
+  <div class="modal-box">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    <h3 class="text-lg font-bold">Hello!</h3>
+    <p class="py-4">Press ESC key or click on ✕ button to close</p>
+  </div>
+</dialog>
 </template>
 
 <script setup lang="ts">
@@ -46,6 +55,8 @@ import { useRequest } from "vue-hooks-plus";
 import {ElMessage, ElNotification} from "element-plus";
 
 const props = defineProps(['fileList','selectedFilesInd'])
+
+const varemit = defineEmits(['showShareLink'])
 
 const validity = ref<number>(1)
 
@@ -64,8 +75,9 @@ const createShare = () => {
   }),{
     onSuccess(res){
       if(res['code']===200){
-        ElMessage({message: '创建成功', type: 'success', plain: true,})
         shareLinkDia.close()
+        ElMessage({message: '创建成功', type: 'success', plain: true,})
+        varemit('showShareLink',res['data']['url'],res['data']['code'])
       }
     },
     onError(err){

@@ -197,50 +197,13 @@
 <recycleBinDia :isOpen="isOpenRecycleBin" @restoreFile="restoreFile"></recycleBinDia>
 <myCollectionDia></myCollectionDia>
 <shareLinkDia
+    @showShareLink = 'showShareLink'
+
     :fileList="fileList"
     :selectedFilesInd="selectedFilesInd"
 >
 </shareLinkDia>
 <shareLinkListDia :parent_id="Object.values(nowPath[nowPath.length-1])[0]"></shareLinkListDia>
-<dialog id="moveFileDia" class="modal">      <!-- 移动文件对话框 -->
-  <div class="modal-box">
-    <form method="dialog">
-      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-    </form>
-    <h3 class="text-lg font-bold">移动文件</h3>
-    <div class="mt-4 flex flex-col gap-4">
-      <label class="input input-bordered flex items-center gap-2">
-        <input v-model="moveFilePath" type="text" class="grow" placeholder="直接输入绝对路径" />
-        <el-icon><Search /></el-icon>
-      </label>
-      <ul class="menu rounded-box w-56 text-base">
-        <li>
-          <a @click="moveFileBack" class="relative">
-            {{ Object.keys(moveFileNow)[0] }}
-            <div class="absolute right-[20px]">
-              <el-icon><Back /></el-icon>
-            </div>
-          </a>
-          <ul>
-            <li
-                v-for="(value,index) in moveFileDirStruct"
-                @dblclick="moveFileEnterDir(value)"
-                @click="moveFileSelectId=value['id']"
-            >
-              <a :class="moveFileSelectId === value['id'] ? 'bg-base-300' : ''"><img :src="fileIcon[0]" class="w-[25px]">{{ value['name'] }}</a>
-            </li>
-          </ul>
-        </li>
-      </ul>
-      <div class="text-center">
-        <button @click="moveFileDiaMove" class="btn btn-active px-16">移动</button>
-      </div>
-    </div>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
 </template>
 
 <script setup lang="ts">
@@ -248,7 +211,7 @@ import { ref, reactive, onMounted, watch, inject } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { request } from "../../apis/request";
 import { getFileListAPI, createDirectoryAPI, modifyFileNameAPI, deleteFileAPI, uploadFileAPI, getFileInfoAPI, collectFileAPI, moveFileAPI, searchFileAPI, getFileListByTypeAPI, getDirStructureAPI } from "../../apis"
-import { ElNotification, ElMessage } from 'element-plus'
+import { ElNotification, ElMessage, ElMessageBox } from 'element-plus'
 import { displayFile, myMenu, recycleBinDia, myCollectionDia, shareLinkDia, shareLinkListDia } from "../../components"
 import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 
@@ -346,6 +309,9 @@ const moveFileNow = ref<object>({'我的网盘':0})    // 搜索文件对话框�
 const moveFileDirStruct = ref<Array<object>>([])    // 搜索文件对话框中的目录结构
 const moveFileSelectId = ref<number>(0)
 const moveFilePath = ref<string>('')      // 支持直接输入路径进行移动
+
+const shareLinkRes = ref<string>('')
+const getCode = ref<string>('')
 
 onMounted(()=>{
   getFileList();
@@ -995,6 +961,14 @@ const downloadFile = () => {    // 下载文件
      }
     }
   }
+}
+
+const showShareLink = (linkUrl,code) => {
+  let link = 'http://47.96.78.173:8888/api/disk/share/'.concat(linkUrl)
+  let msg = `链接：${link}\n提取码：${code}`
+  ElMessageBox.alert(msg, '分享成功', {
+    confirmButtonText: 'OK',
+  });
 }
 </script>
 

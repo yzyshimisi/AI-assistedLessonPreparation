@@ -2,7 +2,7 @@
 import * as echarts from 'echarts/core';
 
 // 引入图表，图表后缀都为 Chart
-import { BarChart, PieChart, LineChart } from 'echarts/charts';
+import { BarChart, PieChart, LineChart, GraphChart } from 'echarts/charts';
 
 // 引入标题，提示框，直角坐标系，数据集，内置数据转换器组件，组件后缀都为 Component
 import {
@@ -31,6 +31,7 @@ echarts.use([
     BarChart,
     PieChart,
     LineChart,
+    GraphChart,
     LabelLayout,
     UniversalTransition,
     CanvasRenderer
