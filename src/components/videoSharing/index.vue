@@ -199,7 +199,7 @@ const assistantRoleSrc = ref<string>('')
 
 onMounted(()=>{
   getSubjectList()
-  assistantRoleSrc.value = getAssistantRoleSrc()
+  assistantRoleSrc.value = getAssistantRoleSrc(userInfo.assistantRole)
 })
 
 const getResourcesList = () => {

@@ -40,7 +40,7 @@
 import { ref } from "vue";
 import { myMenu, examScoreManagement, examScoreSummary, examScoreAnalyse, examTranscript } from "../../components"
 
-const choModule = ref<number>(3)
+const choModule = ref<number>(0)
 </script>
 
 <style scoped>

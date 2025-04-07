@@ -1,12 +1,21 @@
 
 
 const assistantRoleBaseURL = '/assistantRole/'
-const nowAssistantRole = 'C11'
 
-const C11_num = 21
+const getNum = (name) => {
+    console.log(name)
+    console.log(name)
+    switch (name){
+        case 'C11':
+            return 21;
 
-const getAssistantRoleSrc = () => {
-    let num = getRandomNum(1,C11_num)
+        case 'C19':
+            return 20;
+    }
+}
+
+const getAssistantRoleSrc = (nowAssistantRole) => {
+    let num = getRandomNum(1,getNum(nowAssistantRole))
     // console.log(`${assistantRoleBaseURL}${nowAssistantRole}/${nowAssistantRole}_${num}.png`)
     return `${assistantRoleBaseURL}${nowAssistantRole}/${nowAssistantRole}_${num}.png`
 }

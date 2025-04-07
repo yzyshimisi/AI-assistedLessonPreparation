@@ -29,7 +29,13 @@
           </tr>
           <tr>
             <td>AI陪伴助手角色切换</td>
-            <td></td>
+            <td>
+              <select v-model="assistantRole" class="select select-bordered text-base">
+                <option disabled selected value="">请选择AI助手形象</option>
+                <option>C11</option>
+                <option>C19</option>
+              </select>
+            </td>
           </tr>
           <tr>
             <td>主题色切换</td>
@@ -47,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import {reactive, ref, toRef, watch} from "vue";
+import {onMounted, reactive, ref, watch} from "vue";
 import { useMainStore } from "../../stores";
 import { dClickEdit, myMenu } from "../../components";
 import { useRequest } from "vue-hooks-plus";
@@ -60,6 +66,21 @@ const userInfo = reactive({});
 Object.assign(userInfo,userinfostore.userInfo)
 
 const imgBase64 = ref();
+
+const assistantRole = ref<string>(userinfostore.userInfo.assistantRole)
+
+watch(()=>assistantRole.value,()=>{
+  try{
+    userinfostore.changeInfo('assistantRole',assistantRole.value)
+    ElMessage({message: '助手形象切换成功', type: 'success',})
+  }catch (err){
+    ElMessage({message: '助手形象切换失败', type: 'error',})
+  }
+})
+
+onMounted(()=>{
+  assistantRole.value = userInfo['assistantRole']
+})
 
 const avatarChange = (e) => {
   let file = e.raw;

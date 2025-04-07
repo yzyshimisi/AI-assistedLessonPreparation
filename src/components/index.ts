@@ -22,6 +22,12 @@ import experienceDiscuss from "./experienceDiscuss/index.vue";
 import coursewareSharing from "./coursewareSharing/index.vue";
 import videoSharing from "./videoSharing/index.vue";
 import shareLinkListDia from "./shareLinkListDia/index.vue";
+import unitTeachingDesign from "./unitTeachingDesign/index.vue";
+import interdisciplinaryDesign from "./interdisciplinaryDesign/index.vue";
+import unitHomeworkDesign from "./unitHomeworkDesign/index.vue";
+import lessonProposalDesign from "./lessonProposalDesign/index.vue";
+import generatePPT from "./generatePPT/index.vue";
+import oneClickIllustration from "./oneClickIllustration/index.vue";
 
 export {
     chatBox,
@@ -48,4 +54,10 @@ export {
     coursewareSharing,
     videoSharing,
     shareLinkListDia,
+    unitTeachingDesign,
+    interdisciplinaryDesign,
+    unitHomeworkDesign,
+    lessonProposalDesign,
+    generatePPT,
+    oneClickIllustration,
 }

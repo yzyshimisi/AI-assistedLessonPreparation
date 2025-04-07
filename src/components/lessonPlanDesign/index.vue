@@ -1,7 +1,11 @@
 <template>
 <div class="w-[22vw] min-h-[1200px] bg-base-100 rounded-xl p-5 flex flex-col gap-7">
+  <div class="relative flex items-center">
+    <p class="w-full text-center text-lg font-bold">自定义教案</p>
+    <div class="absolute flex items-center right-0"><el-icon @click="closeFuncForm()" class="hover:cursor-pointer"><Close /></el-icon></div>
+  </div>
   <div>
-    <span><span class="text-red-600">* </span>教案名称<el-icon @click="closeFuncForm()" class="float-right hover:cursor-pointer"><Close /></el-icon></span>
+    <span><span class="text-red-600">* </span>教案名称</span>
     <input @keyup.enter="createLessonPlans" v-model="formInfo['textbook_name']" type="text" placeholder="请输入教案的名称" class="input input-bordered w-full mt-2" />
   </div>
   <div class="flex gap-4">
@@ -82,7 +86,7 @@
   </div>
   <div class="flex flex-col gap-2">
     <span><span class="text-red-600">* </span>其他要求</span>
-    <textarea @keyup.enter.prevent="handleEnter" v-model="formInfo['description']" class="textarea textarea-bordered text-base resize-none h-[100px]" placeholder="输入其他的要求"></textarea>
+    <textarea id="textarea" @keydown.enter.prevent @keyup.enter="handleEnter" v-model="formInfo['description']" class="textarea textarea-bordered text-base resize-none h-[100px]" placeholder="输入其他的要求"></textarea>
   </div>
   <img @click="createLessonPlans" src="/aichat/funcFormSub.png" class="hover:cursor-pointer">
 </div>
@@ -91,11 +95,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { UploadProps, UploadRawFile, UploadInstance,UploadUserFile } from 'element-plus'
-import {ElNotification, genFileId} from 'element-plus'
+import { ElNotification, genFileId } from 'element-plus'
 import { lessonPlanUploadAPI, createLessonPlanAPI } from "../../apis"
 import {useRequest} from "vue-hooks-plus";
 
-const varemit = defineEmits(["closeFuncForm",'startCreateLessonPlan','endCreateLessonPlan'])
+const varemit = defineEmits(["closeFuncForm",'startQuickFunction','endQuickFunction'])
 const props = defineProps(['session_id'])
 
 const formInfo = ref<createLessonPlanInfoType>({
@@ -120,8 +124,6 @@ const fileList = ref<UploadUserFile[]>([])
 
 const dialogImageUrl = ref('')  // 预览对话框
 const dialogVisible = ref(false)  // 对话框显示
-
-const lessonPlanRes = ref<string>('')
 
 const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {  // 课本图片的显示
   dialogImageUrl.value = uploadFile.url!
@@ -149,7 +151,7 @@ const referenceMaterialExceed: UploadProps['onExceed'] = (files) => {
 }
 
 const createLessonPlans = () => {     // 上传文件，并获取文件的URL
-  varemit('startCreateLessonPlan')
+  varemit('startQuickFunction',formInfo.value['description'])
   if(fileList.value.length>0){
     for(let i=0;i<fileList.value.length;i++){
       getFileUrl('textbook_img',fileList.value[i].raw)
@@ -170,15 +172,11 @@ const createLessonPlan = () => {    // 创建教案
   useRequest(()=>createLessonPlanAPI(formInfo.value),{
     onSuccess(res){
       if(res['code']===200){
-        console.log(res)
-        lessonPlanRes.value = res['data']['message']
+        varemit('endQuickFunction',res['data']['message'])
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
     },
-    onFinally(){
-      varemit('endCreateLessonPlan',lessonPlanRes.value)
-    }
   })
 }
 
@@ -204,7 +202,7 @@ const closeFuncForm = () => {
 
 const handleEnter = (e) => {
   if(e.ctrlKey && e.keyCode==13) {    //用户点击了ctrl+enter触发
-    let textarea = document.getElementById('textArea') as HTMLTextAreaElement
+    let textarea = document.getElementById('textarea') as HTMLTextAreaElement
     textarea.value += '\n';
   }else {       //用户点击了enter触发
     createLessonPlans()

@@ -66,6 +66,13 @@ import modifyLessonPlanAPI from "./Server/lessonPlanDesign/modifyLessonPlanAPI";
 import getShareLinkListAPI from "./Server/myResources/getShareLinkListAPI";
 import getLessonPreGraphAPI from "./Server/knowledgeGraph/getLessonPreGraphAPI";
 import getTextbookResourcesListAPI from "./Server/sourceMaterial/textbookResources/getTextbookResourcesListAPI";
+import createUnitTeachingDesignAPI from "./Server/unitTeachingDesign/createUnitTeachingDesignAPI";
+import interdisciplinaryDesignAPI from "./Server/interdisciplinaryDesign/interdisciplinaryDesignAPI";
+import unitHomeworkDesignAPI from "./Server/unitHomeworkDesign/unitHomeworkDesignAPI";
+import lessonProposalDesignAPI from "./Server/lessonProposalDesign/lessonProposalDesignAPI";
+import generatePPTOutlineAPI from "./Server/generatePPT/generatePPTOutlineAPI";
+import generatePPTAPI from "./Server/generatePPT/generatePPTAPI";
+import getExerciseResourcesListAPI from "./Server/sourceMaterial/exerciseResources/getExerciseResourcesListAPI";
 
 export {
     loginAPI,
@@ -136,4 +143,11 @@ export {
     getShareLinkListAPI,
     getLessonPreGraphAPI,
     getTextbookResourcesListAPI,
+    createUnitTeachingDesignAPI,
+    interdisciplinaryDesignAPI,
+    unitHomeworkDesignAPI,
+    lessonProposalDesignAPI,
+    generatePPTOutlineAPI,
+    generatePPTAPI,
+    getExerciseResourcesListAPI,
 }

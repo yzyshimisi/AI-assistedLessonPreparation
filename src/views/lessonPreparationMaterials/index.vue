@@ -20,7 +20,7 @@
       <div class="w-full bg-base-100 mt-4 mb-5 p-2 grid grid-cols-4 gap-4">   <!-- 资源列表 -->
         <div v-for="(value,index) in textbookResourcesList" class="shadow-lg flex flex-col gap-2">
           <div class="h-[350px]"><img @click="viewDetailInd=index" :src="value['resource_cover_url']" class="hover:cursor-pointer"></div>
-          <p class="w-full text-center truncate mb-3">{{ value['resource_name'] }}</p>
+          <p class="w-full text-center truncate mb-3 px-2">{{ value['resource_name'] }}</p>
         </div>
       </div>
     </div>
@@ -38,13 +38,23 @@
         <button @click="oneClickDownload" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键下载</button>
       </div>
     </div>
-    <div class="mt-8 flex gap-8 justify-center">
+    <div class="relative mt-8 flex gap-8 justify-center">
       <div class="flex mt-[250px]">
         <el-icon @click="prevPage" size="35" class="py-10 rounded-xl hover:bg-base-200 hover:cursor-pointer"><ArrowLeftBold /></el-icon>
+      </div>
+      <div id="loadingIcon" class="absolute w-[100%] mt-[250px] flex justify-center none">
+        <div> <!-- 加载图标 -->
+          <span class="loading loading-spinner loading-xs"></span>
+          <span class="loading loading-spinner loading-sm"></span>
+          <span class="loading loading-spinner loading-md"></span>
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
       </div>
       <VuePdfEmbed
           :source="textbookResourcesList[viewDetailInd] ? textbookResourcesList[viewDetailInd]['resource_url'] : ''"
           :page="pageNum"
+          @loaded="isLoadingPDF=true"
+          @rendered="isLoadingPDF=false"
           class="w-[85%]"
       />
       <div class="flex mt-[250px]">
@@ -56,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted, watch} from "vue";
+import { ref, onMounted, watch } from "vue";
 import { materialMenu } from "../../components"
 import { useRequest } from "vue-hooks-plus";
 import { getTextbookResourcesListAPI, getSubjectListAPI } from "../../apis"
@@ -76,6 +86,18 @@ watch(()=>choSubject.value,()=>{
 })
 
 const pageNum = ref<number>(1)
+
+const isLoadingPDF = ref<boolean>(false)
+
+// watch(()=>isLoadingPDF.value,()=>{
+//   if(isLoadingPDF.value){
+//     document.getElementById('VuePdfEmbed').style.display = 'none'
+//     document.getElementById('loadingIcon').style.display = 'inline'
+//   }else{
+//     document.getElementById('VuePdfEmbed').style.display = 'inline'
+//     document.getElementById('loadingIcon').style.display = 'none'
+//   }
+// })
 
 onMounted(()=>{
   getSubjectList()

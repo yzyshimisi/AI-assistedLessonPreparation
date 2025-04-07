@@ -15,7 +15,7 @@
       <li><router-link to="/chat">AI智能对话</router-link></li>
       <li><router-link to="/myResources">我的资源</router-link></li>
       <li><router-link to="/lessonPreparationMaterials">备课素材</router-link></li>
-      <li><a>习题素材</a></li>
+      <li><router-link to="/exerciseResources">习题素材</router-link></li>
       <li><router-link to="/classManagement">我的班级</router-link></li>
       <li><a>教小帮-TeachPal</a></li>
       <div class="dropdown dropdown-end mr-4">

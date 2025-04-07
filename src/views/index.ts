@@ -11,6 +11,7 @@ import classManagement from "./classManagement/index.vue";
 import classAcademic from "./classAcademic/index.vue";
 import sharedSpace from "./sharedSpace/index.vue";
 import advertisementPage from "./advertisementPage/index.vue";
+import exerciseResources from "./exerciseResources/index.vue";
 
 export {
     login,
@@ -26,4 +27,5 @@ export {
     classAcademic,
     sharedSpace,
     advertisementPage,
+    exerciseResources,
 }

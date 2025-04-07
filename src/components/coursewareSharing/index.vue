@@ -69,9 +69,17 @@
               <button @click="oneClickDownload" class="btn btn-sm bg-[#ddd6fe] hover:bg-[#c4b5fd]">一键下载</button>
             </div>
           </div>
-          <div class="mt-8 flex gap-8 justify-center">
+          <div class="relative mt-8 flex gap-8 justify-center">
             <div class="flex items-center">
               <el-icon @click="prevPage" size="35" class="py-10 rounded-xl hover:bg-base-200 hover:cursor-pointer"><ArrowLeftBold /></el-icon>
+            </div>
+            <div class="absolute w-full flex justify-center mt-4">
+              <div>   <!-- 加载图标 -->
+                <span class="loading loading-spinner loading-xs"></span>
+                <span class="loading loading-spinner loading-sm"></span>
+                <span class="loading loading-spinner loading-md"></span>
+                <span class="loading loading-spinner loading-lg"></span>
+              </div>
             </div>
             <VuePdfEmbed
                 :source="coursewareResourceList[viewCoursewareDetailsInd]['pdf_url']"
@@ -145,7 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch} from "vue";
+import { onMounted, ref, watch} from "vue";
 import { useMainStore } from "../../stores";
 import { publishResourcesAPI, getResourcesListAPI, searchResourcesAPI, resourceFileUploadAPI, getSubjectListAPI, oneClickTransferAPI } from "../../apis";
 import { useRequest } from "vue-hooks-plus";
@@ -212,9 +220,11 @@ const assistantRoleSrc = ref<string>('')    // 助手角色形象
 
 const pageNum = ref<number>(1)    // 浏览PDF的当前页面
 
+const isLoadingPDF = ref<boolean>(false)
+
 onMounted(()=>{
   getSubjectList()
-  assistantRoleSrc.value = getAssistantRoleSrc()
+  assistantRoleSrc.value = getAssistantRoleSrc(userInfo.assistantRole)
 })
 
 const getResourcesList = () => {

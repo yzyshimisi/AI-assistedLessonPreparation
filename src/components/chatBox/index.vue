@@ -16,13 +16,24 @@
           </div>
         </div>
         <!-- 正常信息 -->
-        <div v-if="value['message_type'] !== 5" class="chat-bubble" :class="[chatMsg[index]['role'] === 'user' ? 'bg-blue-700 text-base-100' : 'bg-base-100 text-base-content']">
+        <div v-if="value['message_type'] <= 4" class="chat-bubble" :class="[chatMsg[index]['role'] === 'user' ? 'bg-blue-700 text-base-100' : 'bg-base-100 text-base-content']">
           <!-- 渲染markdown格式 -->
           <div v-html="converter.makeHtml(chatMsg[index]['message'])" class="w-full">
           </div>
         </div>
+        <!-- PPT文件 -->
+        <div v-else-if="value['message_type'] === 5" class="chat-bubble bg-base-100 text-base-content">
+          <div class="flex flex-col gap-2 max-w-[100px]">
+            <img @click="downloadFileByUrl(value['message'].split(',')[1])" src="/myResources/fileIcon/display-ppt.png" class="hover:cursor-pointer hover:bg-slate-100">
+            <p>{{ value['message'].split(',')[1].substring(value['message'].split(',')[1].lastIndexOf('/')+1) }}</p>
+          </div>
+        </div>
+        <!-- 图片 -->
+        <div v-else-if="value['message_type'] === 6" class="chat-bubble bg-base-100 text-base-content">
+          <img :src="value['message']">
+        </div>
         <!-- 知识图谱 -->
-        <div v-else class="chat-bubble bg-base-100 text-base-content w-[700px] h-[530px]">
+        <div v-else-if="value['message_type'] === 10" class="chat-bubble bg-base-100 text-base-content w-[670px] h-[530px]">
           <RelationGraph @click="nowShowDetailNodeID=''" :ref="(el) => setGraphRef(el)" :options="options">
             <template #node="{ node }">
               <div @contextmenu="showNodeDetail(node.id)" class="my-node flex flex-col gap-[40px]">
@@ -39,19 +50,24 @@
         </div>
       </div>
       <!-- 教案的导出与修改按钮 -->
-      <div v-if="value['message_type']===3" class="w-full flex justify-center gap-8 mt-4">
+      <div v-if="value['message_type']===3" class="w-full flex justify-center gap-8 mt-4 mb-4">
         <button @click="exportLessonPlan(value['id'])" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出教案</button>
         <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改教案</button>
       </div>
+      <!-- PPT大纲的修改与生成PPT按钮 -->
+      <div v-if="value['message_type']===4" class="w-full flex justify-center gap-8 mt-4 mb-4">
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改大纲</button>
+        <button @click="generatePPT" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">一键生成PPT</button>
+      </div>
     </div>
     <!-- 推荐提问 -->
-    <div v-if="isShowRecom" class="flex flex-col gap-6 mt-4">
+    <div v-if="isShowRecom" class="flex flex-col gap-6 mt-8">
       <div v-for="(value,index) in recommendQues">
         <span @click="sendMsgRec(value)" class="p-2 border-2 bg-base-100 rounded-2xl hover:cursor-pointer hover:bg-base-200">{{ value }}</span>
       </div>
     </div>
     <!-- 加载图标-->
-    <div v-show="isWaitingRes" class="mt-4 mb-2 gap-1 flex justify-center" :class="[props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]']">
+    <div v-show="isWaitingRes" class="mt-6 mb-2 gap-1 flex justify-center" :class="[props['isOpenFuncForm'] ? 'w-[900px]' : 'w-[1000px]']">
       <span class="loading loading-dots loading-xs"></span>
       <span class="loading loading-dots loading-sm"></span>
       <span class="loading loading-dots loading-md"></span>
@@ -81,7 +97,7 @@ import {
   sendMsgAPI,
   getLessonPlanInfoAPI,
   modifyLessonPlanAPI,
-  getLessonPreGraphAPI
+  getLessonPreGraphAPI, generatePPTAPI
 } from "../../apis";
 import { ElMessage, ElNotification } from 'element-plus';
 import { useMainStore } from "../../stores";
@@ -138,7 +154,7 @@ const textInput = ref<string>("");    // 文本框
 const chatMsg = ref([]);    // 记录
 const resMsg = ref<string>('')    // 用于实现打字效果
 
-const isWaitingRes = ref<boolean>(false)    // 当前是否正在等待响应
+const isWaitingRes = ref<boolean>(false)    // 当前是否正在等待响应（显示加载图标）
 
 watch(()=>isWaitingRes.value,()=>{
   if(isWaitingRes.value === true){
@@ -146,20 +162,28 @@ watch(()=>isWaitingRes.value,()=>{
   }
 })
 
-const props = defineProps(['id','isOpenFuncForm','isWaitRes','lessonPlanRes','getKnowledgeGraph']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
+const props = defineProps(['id','isOpenFuncForm','isWaitRes','quickFuncReq','quickFuncRes','getKnowledgeGraph']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
 
 watch([()=>props.isWaitRes],()=>{
   if(props.isWaitRes === true){
     isWaitingRes.value = props.isWaitRes
-    let chatBox = document.getElementById('chatBox')    // 定位到最底部
-    chatBox.scrollTop = chatBox.scrollHeight
+    chatMsg.value.push({
+      role: 'user',
+      message: props.quickFuncReq,
+      message_type: 1
+    })
+    nextTick(()=>{
+      let chatBox = document.getElementById("chatBox");  // 定位到最底部
+      chatBox.scrollTop = chatBox.scrollHeight
+    })
   }else{
     isWaitingRes.value = props.isWaitRes
     chatMsg.value.push({
       role: 'ai',
       message: '',
+      message_type: '3',
     })
-    resMsg.value = props.lessonPlanRes
+    resMsg.value = props.quickFuncRes
     print()
   }
 })
@@ -197,10 +221,20 @@ watch(()=>windowScrollY.value,()=>{
 const nodes = ref<Array<object>>([])    // 显示知识图谱数据
 const relationships = ref<Array<object>>([])
 
-watch(()=>props.getKnowledgeGraph,()=>{
+watch(()=>props.getKnowledgeGraph,async ()=>{
   if(props.getKnowledgeGraph && !isWaitingRes.value){
-    chatMsg.value.push({'role':"user", 'message':'查看备课知识图谱'})
+    chatMsg.value.push({'role':"user", 'message':'查看备课知识图谱', 'message_type':'1'})
     isWaitingRes.value = true
+    await nextTick(()=>{
+      let chatBox = document.getElementById("chatBox");  // 定位到最底部
+      chatBox.scrollTop = chatBox.scrollHeight
+    })
+    await sleep(1000)
+    chatMsg.value.push({'role':"ai", 'message':'正在生成备课知识图谱...', 'message_type':'1'})
+    await nextTick(()=>{
+      let chatBox = document.getElementById("chatBox");  // 定位到最底部
+      chatBox.scrollTop = chatBox.scrollHeight
+    })
     getLessonPreGraph()
   }else{
     varemit('endGetKnowledgeGraph')
@@ -232,7 +266,7 @@ const sendMsg = () => {     // 发送信息
     ElMessage({message: '当前正在等待回答！', type: 'warning',})
     return
   }
-  if(props.id === -1) return
+  if(props.id === -1) return  // 未选择会话
   if(textInput.value === '' || textInput.value === '\n'){
     textInput.value = ''
     ElMessage({message: '请输入你的问题', type: 'warning',})
@@ -248,6 +282,7 @@ const sendMsg = () => {     // 发送信息
       chatMsg.value.push({
         role: 'user',
         message: textInput.value,
+        message_type: 1
       })
       nextTick(()=>{
         let chatBox = document.getElementById("chatBox");
@@ -259,6 +294,7 @@ const sendMsg = () => {     // 发送信息
         chatMsg.value.push({
           role: 'ai',
           message: '',
+          message_type: 2
         })
         resMsg.value = res['data']['message']
         print()
@@ -285,14 +321,14 @@ const sendMsg = () => {     // 发送信息
 const print = () => {   // 通过chatMsg与resMsg实现打字效果
   let chatBox = document.getElementById("chatBox");
   if( chatMsg.value[chatMsg.value.length-1]['message'].length >= resMsg.value.length){
-    getChatHistory();
+    getChatHistory();   // 打字打完后，重新获取一下记录
     isShowRecom.value = true
     return
   }
   setTimeout(()=>{
     let flag = false
 
-    if(chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 40){
+    if(chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 40){   // 保持聊天框在滚动条最底部
       flag = true
     }
     chatMsg.value[chatMsg.value.length - 1]['message'] += resMsg.value.charAt(chatMsg.value[chatMsg.value.length - 1]['message'].length);
@@ -401,12 +437,36 @@ const handleScroll = () => {
 const exportLessonPlan = (id) => {    // 导出教案
   useRequest(()=>exportLessonPlanAPI(localStorage.getItem('token'),{message_id:id}),{
     onSuccess(res){
-      console.log(res)
       if(res['code']===200){
         downloadFileByUrl(res['data']['url'])
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }
+    }
+  })
+}
+
+const generatePPT = () => {
+  isWaitingRes.value = true
+  nextTick(()=>{
+    let chatBox = document.getElementById("chatBox");  // 定位到最底部
+    chatBox.scrollTop = chatBox.scrollHeight
+  })
+  useRequest(()=>generatePPTAPI(localStorage.getItem('token'),{session_id:props.id}),{
+    onSuccess(res){
+      if(res['code']===200){
+        chatMsg.value.push({'user':'ai', 'message_type':5, 'message':res['data']['message']})
+        getChatHistory()
+        nextTick(()=>{
+          let chatBox = document.getElementById("chatBox");  // 定位到最底部
+          chatBox.scrollTop = chatBox.scrollHeight
+        })
+      }else{
+        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
+      }
+    },
+    onFinally(){
+      isWaitingRes.value = false
     }
   })
 }
@@ -448,11 +508,15 @@ const getLessonPreGraph = () => {   // 获取备课资料的知识图谱
   useRequest(()=>getLessonPreGraphAPI(localStorage.getItem('token')),{
     onSuccess(res){
       if(res['code']===200){
-        chatMsg.value.push({'role':'ai', 'message_type':5})
+        chatMsg.value.push({'role':'ai', 'message_type':10})
         nodes.value = res['data']['nodes']
         relationships.value = res['data']['relationships']
         isWaitingRes.value = false
         drawKnowledgeGraph()
+        nextTick(()=>{
+          let chatBox = document.getElementById("chatBox");  // 定位到最底部
+          chatBox.scrollTop = chatBox.scrollHeight
+        })
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',});
       }
@@ -538,6 +602,8 @@ const setGraphRef = (el: RelationGraph) => {    // v-for + ref 的使用
     graphRef$.value = el
   }
 }
+
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 </script>
 
 <style scoped lang="scss">

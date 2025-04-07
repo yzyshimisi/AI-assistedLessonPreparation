@@ -9,6 +9,7 @@ const userInfoStore = defineStore('userInfo',
             email: "",
             avatar: "",
             created_at: "",
+            assistantRole: "",
         })
         const setInfo = (data) => {
             Object.assign(userInfo,data);
@@ -22,6 +23,7 @@ const userInfoStore = defineStore('userInfo',
             userInfo['email'] = "";
             userInfo['avatar'] = "";
             userInfo['created_at'] = "";
+            userInfo['assistantRole'] = "";
         }
         return {
             userInfo,

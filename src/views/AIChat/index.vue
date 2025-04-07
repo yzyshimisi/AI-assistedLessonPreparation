@@ -36,13 +36,56 @@
       </div>
     </div>
   </div>
-  <div v-show="nowFuncForms === 0">     <!-- 快速功能表单 -->
+  <div>     <!-- 快速功能表单 -->
     <lessonPlanDesign
+        v-show="nowFuncForms === 0"
         @closeFuncForm="closeFuncForm"
-        @startCreateLessonPlan="isWaitRes = true"
-        @endCreateLessonPlan="endCreateLessonPlan"
+        @startQuickFunction="startQuickFunction"
+        @endQuickFunction="endQuickFunction"
         :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
     ></lessonPlanDesign>
+    <unitTeachingDesign
+        v-show="nowFuncForms === 1"
+        @closeFuncForm="closeFuncForm"
+        @startQuickFunction="startQuickFunction"
+        @endQuickFunction="endQuickFunction"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></unitTeachingDesign>
+    <interdisciplinaryDesign
+        v-show="nowFuncForms === 2"
+        @closeFuncForm="closeFuncForm"
+        @startQuickFunction="startQuickFunction"
+        @endQuickFunction="endQuickFunction"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></interdisciplinaryDesign>
+    <unitHomeworkDesign
+        v-show="nowFuncForms === 3"
+        @closeFuncForm="closeFuncForm"
+        @startQuickFunction="startQuickFunction"
+        @endQuickFunction="endQuickFunction"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></unitHomeworkDesign>
+    <lessonProposalDesign
+        v-show="nowFuncForms === 4"
+        @closeFuncForm="closeFuncForm"
+        @startQuickFunction="startQuickFunction"
+        @endQuickFunction="endQuickFunction"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></lessonProposalDesign>
+    <generatePPT
+        v-show="nowFuncForms === 5"
+        @closeFuncForm="closeFuncForm"
+        @startQuickFunction="startQuickFunction"
+        @endQuickFunction="endQuickFunction"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></generatePPT>
+    <oneClickIllustration
+        v-show="nowFuncForms === 6"
+        @closeFuncForm="closeFuncForm"
+        @startQuickFunction="startQuickFunction"
+        @endQuickFunction="endQuickFunction"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></oneClickIllustration>
   </div>
   <!-- 助手角色 -->
   <div v-if="nowTopicInd === -1" class="flex fixed left-[25vw] bottom-[10px]">
@@ -56,8 +99,11 @@
   <div v-if="nowTopicInd !== -1">
     <chatBox
         :id="topicList[nowTopicInd] ? topicList[nowTopicInd]['id'] : -1"
+
         :isWaitRes="isWaitRes"
-        :lessonPlanRes="lessonPlanRes"
+        :quickFuncReq="quickFuncReq"
+        :quickFuncRes="quickFuncRes"
+
         :isOpenFuncForm="nowFuncForms!==-1"
         :getKnowledgeGraph="getKnowledgeGraph"
 
@@ -142,22 +188,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick, watch } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { getTopicListAPI } from "../../apis/";
 import { ElNotification, ElMessage } from 'element-plus';
-import { useMainStore } from "../../stores";
-import { deleteTopicAPI, modifyTitleAPI, createTopicAPI, searchTopicAPI, getLessonPreGraphAPI } from "../../apis";
+import { deleteTopicAPI, modifyTitleAPI, createTopicAPI, searchTopicAPI } from "../../apis";
 import router from "../../router";
-import { useRoute } from "vue-router";
-import { chatBox, dClickEdit, lessonPlanDesign } from "../../components";
+import { chatBox, dClickEdit, lessonPlanDesign, unitTeachingDesign, interdisciplinaryDesign, unitHomeworkDesign, lessonProposalDesign, generatePPT, oneClickIllustration } from "../../components";
 import { getAssistantRoleSrc } from "../../themes"
 import assistantRole from "../../themes/assistantRole";
+import { useMainStore } from "../../stores";
+
+const userinfostore = useMainStore().userInfoStore()
 
 const topicList = ref([]);
 const isShowChoIcon = ref<Array<boolean>>([]);
 
-const dialogInd = ref<number>(-1);
+const dialogInd = ref<number>(-1);    // 详细信息对话框
 
 const newTopicTitle = ref<string>("");
 
@@ -183,7 +230,8 @@ watch(()=>searchTopicKey.value,()=>{
 })
 
 const isWaitRes = ref<boolean>(false);    // 用来在教案生成与聊天框组件中的数据传递
-const lessonPlanRes = ref<string>('');
+const quickFuncReq = ref<string>('');     // 在聊天框中显示的提问（description）
+const quickFuncRes = ref<string>('');     // 快速功能的回答
 
 const assistantRoleSrc= ref<string>('');
 
@@ -191,7 +239,7 @@ const getKnowledgeGraph = ref<boolean>(false)
 
 onMounted(()=>{
   getTopicList()
-  assistantRoleSrc.value = getAssistantRoleSrc()
+  assistantRoleSrc.value = getAssistantRoleSrc(userinfostore.userInfo.assistantRole)
 })
 
 const showChoIcon = (ind) => {
@@ -285,8 +333,9 @@ const deleteTopic = () => {
     onSuccess(res){
       if(res['code'] === 200){
         topicList.value.splice(dialogInd.value,1);
-        dialogInd.value = -1;
-        nowTopicInd.value = -1
+        dialogInd.value = -1;       // 关闭详细信息对话框
+        nowTopicInd.value = -1;     // 关闭当前的聊天框
+        nowFuncForms.value = -1     // 关闭快速功能表单
         router.push("/chat");
         document.getElementById("closeDialog").click();
         ElNotification({title: 'Success', message: "删除成功", type: 'success',});
@@ -351,9 +400,14 @@ const closeFuncForm = () => {
   nowFuncForms.value = -1
 }
 
-const endCreateLessonPlan = (str) => {
+const startQuickFunction = (str) => {
+  isWaitRes.value = true
+  quickFuncReq.value = str
+}
+
+const endQuickFunction = (str) => {
   isWaitRes.value = false
-  lessonPlanRes.value = str
+  quickFuncRes.value = str
 }
 </script>
 
