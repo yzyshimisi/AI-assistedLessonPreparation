@@ -6,6 +6,15 @@
       <option v-for="(value,index) in weekByWeek" :value="index+1">{{ value }}</option>
     </select>
     <button class="btn btn-sm btn-outline border-purple-300 hover:bg-[#e8def7] hover:text-base-content font-normal text-base ml-2">切换周次</button>
+    <div class="divider divider-horizontal"></div>
+    <!-- 学年 -->
+    <select v-model="academicYear" class="select select-bordered select-sm text-base bg-base-200 ml-4">
+      <option v-for="(value,index) in yearList">{{ value }}</option>
+    </select>
+    <select v-model="academicTerm" class="select select-bordered select-sm ml-2 text-base bg-base-200 ">
+      <option :value="1">上学期</option>
+      <option :value="2">下学期</option>
+    </select>
   </div>
 <!--  <el-table-->
 <!--      :data="tableData"-->
@@ -76,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import { getCourseListAPI, getClassListAPI, getTimetableAPI } from "../../apis"
 import { ElNotification } from 'element-plus'
@@ -108,6 +117,15 @@ watch(()=>nowWeek.value,()=>{
   getTimetable()
 })
 
+const yearList = ref<Array<string>>([])       // 列表（以当前年份往前推5年）
+
+const academicYear = ref<string>('')   // 学年
+const academicTerm = ref<number>(-1)   // 学期
+
+watch([()=>academicYear.value,()=>academicTerm.value],()=>{
+  getTimetable()
+})
+
 const WEEKDAY = ['周一','周二','周三','周四','周五']
 
 const SECTION = ['1-2','3-4','6-7','8-9','10-11']
@@ -121,6 +139,15 @@ const courseData = ref<Object>({});
 const classList = ref<Array<string>>([]);
 
 onMounted(()=>{
+  for(let i=0; i<5; i++){   // 初始化年份列表
+    yearList.value.push(String(new Date().getFullYear()-i).concat('-').concat(String(new Date().getFullYear()+1-i)))
+  }
+  academicYear.value = yearList.value[0]
+
+  let month = new Date().getMonth() + 1
+  if(month>7) academicTerm.value = 1
+  else academicTerm.value = 2
+
   getCourseList()
   getClassList()
   getTimetable()
@@ -137,15 +164,17 @@ const getCourseList = () => {
       if(res['code']===200){
         courseList.value = res['data']
         teachTimeList.value = []
-        for(let i=0; i<courseList.value.length; i++){
-          let l1 = courseList.value[i]['weekday'].split(',')
-          let l2 = courseList.value[i]['section'].split(',')
-          let s = ''
-          for(let j=0; j<l1.length-1; j++){
-            s = s.concat(WEEKDAY[Number(l1[j])-1]).concat(l2[j]).concat(',')
+        if(courseList.value){
+          for(let i=0; i<courseList.value.length; i++){
+            let l1 = courseList.value[i]['weekday'].split(',')
+            let l2 = courseList.value[i]['section'].split(',')
+            let s = ''
+            for(let j=0; j<l1.length-1; j++){
+              s = s.concat(WEEKDAY[Number(l1[j])-1]).concat(l2[j]).concat(',')
+            }
+            s = s.concat(WEEKDAY[Number(l1[l1.length-1])-1]).concat(l2[l1.length-1])
+            teachTimeList.value.push(s)
           }
-          s = s.concat(WEEKDAY[Number(l1[l1.length-1])-1]).concat(l2[l1.length-1])
-          teachTimeList.value.push(s)
         }
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
@@ -155,21 +184,17 @@ const getCourseList = () => {
 }
 
 const getTimetable = () => {
-  let year = String(new Date().getFullYear()).concat('-').concat(String(new Date().getFullYear()+1))
-  let month = new Date().getMonth() + 1
-  let term
-  if(month>7) term = 1;
-  else term = 2
-
-  useRequest(()=>getTimetableAPI(localStorage.getItem('token'),{week:nowWeek.value,academic_year:String(year),academic_term:term}),{
+  useRequest(()=>getTimetableAPI(localStorage.getItem('token'),{week:nowWeek.value,academic_year:academicYear.value,academic_term:academicTerm.value}),{
     onSuccess(res){
       if(res['code']===200){
         tableTimeData.value = [['','','','',''],['','','','',''],['','','','',''],['','','','',''],['','','','','']]
-        for(let i=0; i<res['data'].length; i++){
-          let weekday = Number(res['data'][i]['weekday']) - 1
-          let section = SECTION.indexOf(res['data'][i]['section'])
-          tableTimeData.value[section][weekday] = res['data'][i]
-          // console.log(tableTimeData.value)
+        if(res['data']){
+          for(let i=0; i<res['data'].length; i++){
+            let weekday = Number(res['data'][i]['weekday']) - 1
+            let section = SECTION.indexOf(res['data'][i]['section'])
+            tableTimeData.value[section][weekday] = res['data'][i]
+            // console.log(tableTimeData.value)
+          }
         }
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})

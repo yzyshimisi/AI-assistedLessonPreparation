@@ -18,9 +18,9 @@
         <el-icon><Search /></el-icon>
       </label>
       <div class="w-full bg-base-100 mt-4 mb-5 p-2 grid grid-cols-4 gap-4">   <!-- 资源列表 -->
-        <div v-for="(value,index) in exerciseResourcesList" class="shadow-lg flex flex-col gap-2">
-          <div class="h-[340px]"><img @click="viewDetailInd=index" :src="value['resource_cover_url']" class="hover:cursor-pointer"></div>
-          <p class="w-full text-center truncate mb-3 px-2">{{ value['resource_name'] }}</p>
+        <div v-for="(value,index) in exerciseResourcesList" class="relative shadow-lg flex flex-col gap-2">
+          <div class="mb-[50px]"><img @click="viewDetailInd=index" :src="value['resource_cover_url']" class="hover:cursor-pointer"></div>
+          <p class="absolute bottom-0 w-full text-center truncate mb-3 px-2">{{ value['resource_name'] }}</p>
         </div>
       </div>
     </div>

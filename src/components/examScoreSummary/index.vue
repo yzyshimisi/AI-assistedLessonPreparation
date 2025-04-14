@@ -23,6 +23,7 @@
     </div>
     <div class="flex flex-col gap-4 bg-[#f3f1ff] p-3 h-[350px] border-2">
       <p class="text-[#f6ba63] mb-4">班级：{{ showClassInd === -1 ? '未选择' : classList[showClassInd] }}</p>
+      <!-- 柱状图 -->
       <div id="barChart" class="w-[380px] h-[280px]"></div>
     </div>
     <div class="flex flex-col bg-[#f3f1ff] p-3 h-[350px] border-2">
@@ -75,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import {nextTick, onMounted, ref, watch} from "vue";
 import { obtainClassListAPI, getAverageGpaAPI, getScoreOverviewAPI, getAcademicAchieveAPI } from "../../apis"
 import { useRequest } from "vue-hooks-plus/es";
 import echarts from "../../echarts";
@@ -117,7 +118,9 @@ onMounted(()=>{
     YEAR.value.push(nowYear-i);
   }
 
-  setBarChart()
+  nextTick(()=>{
+    setBarChart()
+  })
 })
 
 const setBarChart = () => {   // 设置柱状图

@@ -61,7 +61,7 @@ const routes = [
     {
         path: '/exerciseResources',
         component: exerciseResources
-    }
+    },
 ]
 
 const router = createRouter({

@@ -28,6 +28,13 @@ import unitHomeworkDesign from "./unitHomeworkDesign/index.vue";
 import lessonProposalDesign from "./lessonProposalDesign/index.vue";
 import generatePPT from "./generatePPT/index.vue";
 import oneClickIllustration from "./oneClickIllustration/index.vue";
+import generateKnowledgeGraph from "./generateKnowledgeGraph/index.vue";
+import singleChoice from "./questionTemplate/singleChoice.vue";
+import multipleChoice from "./questionTemplate/multipleChoice.vue";
+import shortAnswer from "./questionTemplate/shortAnswer.vue";
+import correspondingExercises from "./correspondingExercises/index.vue";
+import wrongQuestion from "./wrongQuestion/index.vue";
+import conversationalLearning from "./conversationalLearning/index.vue";
 
 export {
     chatBox,
@@ -60,4 +67,11 @@ export {
     lessonProposalDesign,
     generatePPT,
     oneClickIllustration,
+    generateKnowledgeGraph,
+    singleChoice,
+    multipleChoice,
+    shortAnswer,
+    correspondingExercises,
+    wrongQuestion,
+    conversationalLearning,
 }

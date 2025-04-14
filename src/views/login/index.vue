@@ -73,12 +73,14 @@ const login = () => {
   useRequest(()=>loginAPI({"email":email.value, "password":password.value}),{
     onSuccess(res){
       if(res['code'] === 200){
+
         localStorage.setItem("token",res['data']['token']);
         loginstore.setLogin(true);
 
         getUserInfo();  // 获取用户信息
+        userinfostore.changeInfo('assistantRole','C11');
 
-        router.push("/chat");
+        router.push("/chat").then(() => { window.location.reload() });
 
         ElNotification({title: 'Success', message: '登录成功', type: 'success',})
       }else{
@@ -96,7 +98,6 @@ const getUserInfo = () => {
     onSuccess(res){
       if(res['code']===200){
         userinfostore.setInfo(res['data']);
-        userinfostore.changeInfo('assistantRole','C11');
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
       }

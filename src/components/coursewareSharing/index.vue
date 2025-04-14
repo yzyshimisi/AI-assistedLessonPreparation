@@ -74,7 +74,7 @@
               <el-icon @click="prevPage" size="35" class="py-10 rounded-xl hover:bg-base-200 hover:cursor-pointer"><ArrowLeftBold /></el-icon>
             </div>
             <div class="absolute w-full flex justify-center mt-4">
-              <div>   <!-- 加载图标 -->
+              <div class="flex gap-2">   <!-- 加载图标 -->
                 <span class="loading loading-spinner loading-xs"></span>
                 <span class="loading loading-spinner loading-sm"></span>
                 <span class="loading loading-spinner loading-md"></span>

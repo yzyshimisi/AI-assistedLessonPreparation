@@ -86,6 +86,13 @@
         @endQuickFunction="endQuickFunction"
         :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
     ></oneClickIllustration>
+    <generateKnowledgeGraph
+        v-show="nowFuncForms === 7"
+        @closeFuncForm="closeFuncForm"
+        @startQuickFunction="startQuickFunction"
+        @endGenerateGraph="endGenerateGraph"
+        :session_id="nowTopicInd !== -1 ? topicList[nowTopicInd]['id'] : '-1'"
+    ></generateKnowledgeGraph>
   </div>
   <!-- 助手角色 -->
   <div v-if="nowTopicInd === -1" class="flex fixed left-[25vw] bottom-[10px]">
@@ -103,9 +110,9 @@
         :isWaitRes="isWaitRes"
         :quickFuncReq="quickFuncReq"
         :quickFuncRes="quickFuncRes"
+        :knowledgeGraphRes="knowledgeGraphRes"
 
         :isOpenFuncForm="nowFuncForms!==-1"
-        :getKnowledgeGraph="getKnowledgeGraph"
 
         @endGetKnowledgeGraph="getKnowledgeGraph=false"
     ></chatBox>
@@ -194,7 +201,7 @@ import { getTopicListAPI } from "../../apis/";
 import { ElNotification, ElMessage } from 'element-plus';
 import { deleteTopicAPI, modifyTitleAPI, createTopicAPI, searchTopicAPI } from "../../apis";
 import router from "../../router";
-import { chatBox, dClickEdit, lessonPlanDesign, unitTeachingDesign, interdisciplinaryDesign, unitHomeworkDesign, lessonProposalDesign, generatePPT, oneClickIllustration } from "../../components";
+import { chatBox, dClickEdit, lessonPlanDesign, unitTeachingDesign, interdisciplinaryDesign, unitHomeworkDesign, lessonProposalDesign, generatePPT, oneClickIllustration, generateKnowledgeGraph } from "../../components";
 import { getAssistantRoleSrc } from "../../themes"
 import assistantRole from "../../themes/assistantRole";
 import { useMainStore } from "../../stores";
@@ -218,7 +225,7 @@ const funcList = reactive([
     '说课稿设计',
     '一键生成PPT',
     '一键配图',
-    '查看知识图谱',
+    '生成知识图谱',
 ])
 const nowFuncForms = ref<number>(-1);
 
@@ -232,10 +239,9 @@ watch(()=>searchTopicKey.value,()=>{
 const isWaitRes = ref<boolean>(false);    // 用来在教案生成与聊天框组件中的数据传递
 const quickFuncReq = ref<string>('');     // 在聊天框中显示的提问（description）
 const quickFuncRes = ref<string>('');     // 快速功能的回答
+const knowledgeGraphRes = ref<knowledgeGraphType>();
 
 const assistantRoleSrc= ref<string>('');
-
-const getKnowledgeGraph = ref<boolean>(false)
 
 onMounted(()=>{
   getTopicList()
@@ -389,11 +395,8 @@ const quickFun = (ind,val) => {   // 快速功能的执行函数
     ElMessage({message: '请先选择一个会话', type: 'warning',})
     return
   }
-  if(val==='查看知识图谱'){
-    getKnowledgeGraph.value = true
-  }else{
-    nowFuncForms.value = ind
-  }
+    // getKnowledgeGraph.value = true
+  nowFuncForms.value = ind
 }
 
 const closeFuncForm = () => {
@@ -403,11 +406,17 @@ const closeFuncForm = () => {
 const startQuickFunction = (str) => {
   isWaitRes.value = true
   quickFuncReq.value = str
+  quickFuncRes.value = ''
 }
 
 const endQuickFunction = (str) => {
   isWaitRes.value = false
   quickFuncRes.value = str
+}
+
+const endGenerateGraph = (result) => {
+  isWaitRes.value = false
+  knowledgeGraphRes.value = result
 }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="flex">
   <div v-show="gpaOrChapter===1" class="flex flex-col gap-4 ml-4">
     <div class="flex gap-8 items-center">
       <div class="flex flex-col gap-8">

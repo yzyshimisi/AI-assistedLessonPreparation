@@ -15,26 +15,29 @@
                 :src="[chatMsg[index]['role'] === 'user' ? userinfostore.userInfo.avatar : '/aichat/aiAvatar.png']" />
           </div>
         </div>
+<!--        <div class="chat-bubble bg-base-100">-->
+<!--          &lt;!&ndash; 渲染markdown格式 &ndash;&gt;-->
+<!--          <div v-html="converter.makeHtml('# text\n## text2')" class="w-full prose" :class="[chatMsg[index]['role'] === 'user' ? 'text-white' : '']"></div>-->
+<!--        </div>-->
         <!-- 正常信息 -->
-        <div v-if="value['message_type'] <= 4" class="chat-bubble" :class="[chatMsg[index]['role'] === 'user' ? 'bg-blue-700 text-base-100' : 'bg-base-100 text-base-content']">
+        <div v-if="value['message_type'] <= 8" class="chat-bubble" :class="[chatMsg[index]['role'] === 'user' ? 'bg-blue-700' : 'bg-base-100']">
           <!-- 渲染markdown格式 -->
-          <div v-html="converter.makeHtml(chatMsg[index]['message'])" class="w-full">
-          </div>
+          <div v-html="converter.makeHtml(chatMsg[index]['message'])" class="w-full prose" :class="[chatMsg[index]['role'] === 'user' ? 'text-white' : '']"></div>
         </div>
         <!-- PPT文件 -->
-        <div v-else-if="value['message_type'] === 5" class="chat-bubble bg-base-100 text-base-content">
+        <div v-else-if="value['message_type'] === 9" class="chat-bubble bg-base-100 text-base-content">
           <div class="flex flex-col gap-2 max-w-[100px]">
             <img @click="downloadFileByUrl(value['message'].split(',')[1])" src="/myResources/fileIcon/display-ppt.png" class="hover:cursor-pointer hover:bg-slate-100">
             <p>{{ value['message'].split(',')[1].substring(value['message'].split(',')[1].lastIndexOf('/')+1) }}</p>
           </div>
         </div>
         <!-- 图片 -->
-        <div v-else-if="value['message_type'] === 6" class="chat-bubble bg-base-100 text-base-content">
+        <div v-else-if="value['message_type'] === 10" class="chat-bubble bg-base-100 text-base-content">
           <img :src="value['message']">
         </div>
         <!-- 知识图谱 -->
-        <div v-else-if="value['message_type'] === 10" class="chat-bubble bg-base-100 text-base-content w-[670px] h-[530px]">
-          <RelationGraph @click="nowShowDetailNodeID=''" :ref="(el) => setGraphRef(el)" :options="options">
+        <div v-else-if="value['message_type'] === 11" class="chat-bubble bg-base-100 text-base-content w-[670px] h-[530px]">
+          <RelationGraph @click="nowShowDetailNodeID=''" :ref="(el) => drawKnowledgeGraph(el,value['message'])" :options="options">
             <template #node="{ node }">
               <div @contextmenu="showNodeDetail(node.id)" class="my-node flex flex-col gap-[40px]">
                 <div class="my-node-text w-full text-center truncate">{{ node.text }}</div>
@@ -54,10 +57,35 @@
         <button @click="exportLessonPlan(value['id'])" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出教案</button>
         <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改教案</button>
       </div>
-      <!-- PPT大纲的修改与生成PPT按钮 -->
+      <!-- 单元教学设计按钮 -->
       <div v-if="value['message_type']===4" class="w-full flex justify-center gap-8 mt-4 mb-4">
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出单元教学设计</button>
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改单元教学设计</button>
+      </div>
+      <!-- 跨学科设计按钮 -->
+      <div v-if="value['message_type']===5" class="w-full flex justify-center gap-8 mt-4 mb-4">
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出跨学科设计</button>
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改跨学科设计</button>
+      </div>
+      <!-- 单元作业设计按钮 -->
+      <div v-if="value['message_type']===6" class="w-full flex justify-center gap-8 mt-4 mb-4">
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出单元作业</button>
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改单元作业</button>
+      </div>
+      <!-- 说课稿设计按钮 -->
+      <div v-if="value['message_type']===7" class="w-full flex justify-center gap-8 mt-4 mb-4">
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出说课稿</button>
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改说课稿</button>
+      </div>
+      <!-- PPT大纲的修改与生成PPT按钮 -->
+      <div v-if="value['message_type']===8" class="w-full flex justify-center gap-8 mt-4 mb-4">
         <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改大纲</button>
         <button @click="generatePPT" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">一键生成PPT</button>
+      </div>
+      <!-- 知识图谱按钮 -->
+      <div v-if="value['message_type']===11" class="w-full flex justify-center gap-8 mt-4 mb-4">
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">导出知识图谱</button>
+        <button @click="" class="btn btn-outline bg-white text-[#1d4ed8] border-blue-500 hover:bg-blue-100 hover:text-[#1d4ed8] hover:border-blue-500 px-8">修改知识图谱</button>
       </div>
     </div>
     <!-- 推荐提问 -->
@@ -89,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from "vue";
+import { ref, onMounted, watch, nextTick, } from "vue";
 import { useRequest } from "vue-hooks-plus";
 import {
   exportLessonPlanAPI,
@@ -97,14 +125,14 @@ import {
   sendMsgAPI,
   getLessonPlanInfoAPI,
   modifyLessonPlanAPI,
-  getLessonPreGraphAPI, generatePPTAPI
+  getLessonPreGraphAPI,
+  generatePPTAPI,
 } from "../../apis";
 import { ElMessage, ElNotification } from 'element-plus';
 import { useMainStore } from "../../stores";
 import * as showdown from "showdown"
 import RelationGraph from 'relation-graph-vue3'
 
-const graphRef$ = ref<RelationGraph>()
 const options = {
   "backgroundImage": "",
   "backgroundImageNoRepeat": true,
@@ -123,28 +151,34 @@ const options = {
   ]
 }
 
-const jsonData = {
-  rootId: 'a',
-  nodes: [
-    { id: 'a', text: 'a', },
-    { id: 'b', text: 'b', },
-    { id: 'c', text: 'c', },
-    { id: 'd', text: 'd', },
-    { id: 'e', text: 'e', },
-    { id: 'f', text: 'f', },
-  ],
-  lines: [
-    { from: 'a', to: 'b', },
-    { from: 'a', to: 'c', },
-    { from: 'a', to: 'd', },
-    { from: 'a', to: 'e', },
-    { from: 'a', to: 'f', },
-  ],
-}
+// const jsonData = {
+//   rootId: 'a',
+//   nodes: [
+//     { id: 'a', text: 'a', },
+//     { id: 'b', text: 'b', },
+//     { id: 'c', text: 'c', },
+//     { id: 'd', text: 'd', },
+//     { id: 'e', text: 'e', },
+//     { id: 'f', text: 'f', },
+//   ],
+//   lines: [
+//     { from: 'a', to: 'b', },
+//     { from: 'a', to: 'c', },
+//     { from: 'a', to: 'd', },
+//     { from: 'a', to: 'e', },
+//     { from: 'a', to: 'f', },
+//   ],
+// }
 
 const varemit = defineEmits(["endGetKnowledgeGraph"])
 
-const converter = new showdown.Converter()  // 将markdown转为html
+const converter = new showdown.Converter({
+  parseImgDimensions: true,
+  simplifiedAutoLink: true,
+  excludeTrailingPunctuationFromURLs: true,
+  tables: true,
+  ghCodeBlocks: true
+})  // 将markdown转为html
 converter.setOption("tables",true);
 
 const userinfostore = useMainStore().userInfoStore();
@@ -152,7 +186,8 @@ const userinfostore = useMainStore().userInfoStore();
 const textInput = ref<string>("");    // 文本框
 
 const chatMsg = ref([]);    // 记录
-const resMsg = ref<string>('')    // 用于实现打字效果
+
+const isAllowDrawGraph = ref<boolean>(true)   // 判断是否允许画图（防止打字效果时，知识图谱重复渲染）
 
 const isWaitingRes = ref<boolean>(false)    // 当前是否正在等待响应（显示加载图标）
 
@@ -162,9 +197,9 @@ watch(()=>isWaitingRes.value,()=>{
   }
 })
 
-const props = defineProps(['id','isOpenFuncForm','isWaitRes','quickFuncReq','quickFuncRes','getKnowledgeGraph']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
+const props = defineProps(['id','isOpenFuncForm','isWaitRes','quickFuncReq','quickFuncRes','knowledgeGraphRes']);  // 接收父组件传来的会话id、是否开启功能表单（开启功能表单，对话框的位置、宽度会有所变化）
 
-watch([()=>props.isWaitRes],()=>{
+watch([()=>props.isWaitRes],()=>{   // 快速功能的结果
   if(props.isWaitRes === true){
     isWaitingRes.value = props.isWaitRes
     chatMsg.value.push({
@@ -178,13 +213,27 @@ watch([()=>props.isWaitRes],()=>{
     })
   }else{
     isWaitingRes.value = props.isWaitRes
-    chatMsg.value.push({
-      role: 'ai',
-      message: '',
-      message_type: '3',
-    })
-    resMsg.value = props.quickFuncRes
-    print()
+    if(props.quickFuncRes){   // 其他的快速功能回答内容
+      if(props.quickFuncRes.startsWith("https://")){  // 图片等链接，就不进行打字效果了
+        getChatHistory();   // 直接重新获取一下记录
+        isAllowDrawGraph.value = true
+        return
+      }else{  // 文本信息显示
+        chatMsg.value.push({
+          role: 'ai',
+          message: '',
+          message_type: '3',
+        })
+        print({message: props.quickFuncRes})
+      }
+    }else{   // 知识图谱
+      isAllowDrawGraph.value = true
+      chatMsg.value.push({'role':'ai', 'message_type':11, 'message':JSON.stringify(props.knowledgeGraphRes)})
+      nextTick(()=>{
+        let chatBox = document.getElementById("chatBox");  // 定位到最底部
+        chatBox.scrollTop = chatBox.scrollHeight
+      })
+    }
   }
 })
 
@@ -218,30 +267,25 @@ watch(()=>windowScrollY.value,()=>{
   oldScrollY.value = windowScrollY.value
 })
 
-const nodes = ref<Array<object>>([])    // 显示知识图谱数据
-const relationships = ref<Array<object>>([])
-
-watch(()=>props.getKnowledgeGraph,async ()=>{
-  if(props.getKnowledgeGraph && !isWaitingRes.value){
-    chatMsg.value.push({'role':"user", 'message':'查看备课知识图谱', 'message_type':'1'})
-    isWaitingRes.value = true
-    await nextTick(()=>{
-      let chatBox = document.getElementById("chatBox");  // 定位到最底部
-      chatBox.scrollTop = chatBox.scrollHeight
-    })
-    await sleep(1000)
-    chatMsg.value.push({'role':"ai", 'message':'正在生成备课知识图谱...', 'message_type':'1'})
-    await nextTick(()=>{
-      let chatBox = document.getElementById("chatBox");  // 定位到最底部
-      chatBox.scrollTop = chatBox.scrollHeight
-    })
-    getLessonPreGraph()
-  }else{
-    varemit('endGetKnowledgeGraph')
-  }
-})
-
-const knowledgeGraphInfo = ref<object>({})
+// watch(()=>props.getKnowledgeGraph,async ()=>{
+//   if(props.getKnowledgeGraph && !isWaitingRes.value){
+//     chatMsg.value.push({'role':"user", 'message':'查看备课知识图谱', 'message_type':'1'})
+//     isWaitingRes.value = true
+//     await nextTick(()=>{
+//       let chatBox = document.getElementById("chatBox");  // 定位到最底部
+//       chatBox.scrollTop = chatBox.scrollHeight
+//     })
+//     await sleep(1000)
+//     chatMsg.value.push({'role':"ai", 'message':'正在生成备课知识图谱...', 'message_type':'1'})
+//     await nextTick(()=>{
+//       let chatBox = document.getElementById("chatBox");  // 定位到最底部
+//       chatBox.scrollTop = chatBox.scrollHeight
+//     })
+//     getLessonPreGraph()
+//   }else{
+//     varemit('endGetKnowledgeGraph')
+//   }
+// })
 
 onMounted(()=>{
   // 初始化聊天框的高度
@@ -296,8 +340,7 @@ const sendMsg = () => {     // 发送信息
           message: '',
           message_type: 2
         })
-        resMsg.value = res['data']['message']
-        print()
+        print(res['data'])
         recommendQues.value = []
         recommendQues.value.push(res['data']['follow_1'])
         recommendQues.value.push(res['data']['follow_2'])
@@ -318,24 +361,24 @@ const sendMsg = () => {     // 发送信息
   textInput.value = ''
 }
 
-const print = () => {   // 通过chatMsg与resMsg实现打字效果
+const print = (data) => {   // 实现打字效果
   let chatBox = document.getElementById("chatBox");
-  if( chatMsg.value[chatMsg.value.length-1]['message'].length >= resMsg.value.length){
+  if( chatMsg.value[chatMsg.value.length-1]['message'].length >= data['message'].length){
     getChatHistory();   // 打字打完后，重新获取一下记录
-    isShowRecom.value = true
+    if(data['follow_1']) isShowRecom.value = true
     return
   }
   setTimeout(()=>{
     let flag = false
 
-    if(chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 40){   // 保持聊天框在滚动条最底部
+    if(chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80){   // 保持聊天框在滚动条最底部
       flag = true
     }
-    chatMsg.value[chatMsg.value.length - 1]['message'] += resMsg.value.charAt(chatMsg.value[chatMsg.value.length - 1]['message'].length);
+    chatMsg.value[chatMsg.value.length-1]['message'] += data['message'].charAt(chatMsg.value[chatMsg.value.length-1]['message'].length);
     if(flag){
       chatBox.scrollTop = chatBox.scrollHeight
     }
-    print()
+    print(data)
   },50)
 }
 
@@ -348,14 +391,17 @@ const getChatHistory = () => {    // 获取会话记录
   }),{
     onSuccess(res){
       if(res['code']===200){
+        isAllowDrawGraph.value = true
+
         chatMsg.value = []
         if(res['data']['chat_history']){
           for(let i=0; i<res['data']['chat_history'].length; i++){
+            res['data']['chat_history'][i]['message_type']
             chatMsg.value.push(res['data']['chat_history'][i]);
           }
         }
         console.log(chatMsg.value)
-        nextTick(()=>{
+        nextTick(()=>{    // 定位到聊天框最底部
           let chatBox = document.getElementById("chatBox");
           chatBox.scrollTop = chatBox.scrollHeight
         })
@@ -504,109 +550,95 @@ const sendMsgRec = (text) => {
   sendMsg()
 }
 
-const getLessonPreGraph = () => {   // 获取备课资料的知识图谱
-  useRequest(()=>getLessonPreGraphAPI(localStorage.getItem('token')),{
-    onSuccess(res){
-      if(res['code']===200){
-        chatMsg.value.push({'role':'ai', 'message_type':10})
-        nodes.value = res['data']['nodes']
-        relationships.value = res['data']['relationships']
-        isWaitingRes.value = false
-        drawKnowledgeGraph()
-        nextTick(()=>{
-          let chatBox = document.getElementById("chatBox");  // 定位到最底部
-          chatBox.scrollTop = chatBox.scrollHeight
-        })
-      }else{
-        ElNotification({title: 'Warning', message: res['msg'], type: 'warning',});
-      }
-    },
-    onFinally(){
-      varemit('endGetKnowledgeGraph')
-    }
-  })
-}
+// const getLessonPreGraph = () => {   // 获取备课资料的知识图谱
+//   useRequest(()=>getLessonPreGraphAPI(localStorage.getItem('token')),{
+//     onSuccess(res){
+//       if(res['code']===200){
+//         chatMsg.value.push({'role':'ai', 'message_type':10})
+//         nodes.value = res['data']['nodes']
+//         relationships.value = res['data']['relationships']
+//         isWaitingRes.value = false
+//         drawKnowledgeGraph()
+//         nextTick(()=>{
+//           let chatBox = document.getElementById("chatBox");  // 定位到最底部
+//           chatBox.scrollTop = chatBox.scrollHeight
+//         })
+//       }else{
+//         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',});
+//       }
+//     },
+//     onFinally(){
+//       varemit('endGetKnowledgeGraph')
+//     }
+//   })
+// }
 
-const drawKnowledgeGraph = async () => {
-  let jsonData: KnowledgeGraphType = {
+const drawKnowledgeGraph = async (ref,data) => {
+  if(!isAllowDrawGraph.value) return
+  let graphJson = JSON.parse(data)    // 获取到的知识图谱数据
+  let nodes = graphJson['nodes']
+  let relationships = graphJson['relationships']
+
+  let jsonData: knowledgeGraphType = {    // 作图需要的数据格式
     nodes: [],
     lines: [],
   }
   let processNode = []
   let lines = []
 
-  for(let i=0; i<nodes.value.length; i++){    // 提取节点信息
+  for(let i=0; i<nodes.length; i++){    // 提取节点信息
     let o = {}
-    o['id'] = nodes.value[i]['element_id']
+    o['id'] = nodes[i]['element_id']
 
-    if(nodes.value[i]['labels'][0] === 'Document')
+    if(nodes[i]['labels'][0] === 'Document')    // 根节点
     {
-      o['text'] = nodes.value[i]['properties']['fileName']
+      o['text'] = nodes[i]['properties']['fileName']
+      o['width'] = 150
+      o['height'] = 150
     }
-    else if(nodes.value[i]['labels'][0] === 'Chunk')
+    else if(nodes[i]['labels'][0] === 'Chunk')
     {
-      o['text'] = nodes.value[i]['properties']['text']
+      o['text'] = nodes[i]['properties']['text']
       o['nodeShape'] = '1'
       o['width'] = 150
       o['height'] = 100
     }
-    else if(nodes.value[i]['labels'][0] === "__Entity__")
+    else if(nodes[i]['labels'][0] === "__Entity__")
     {
-      o['text'] = nodes.value[i]['properties']['id']
+      o['text'] = nodes[i]['properties']['id']
     }else{
-      console.log(nodes.value[i])
+      console.log(nodes[i])
     }
 
     processNode.push(o)
   }
-  for(let i=0; i<relationships.value.length; i++){
+  for(let i=0; i<relationships.length; i++){
     let o = {}
-    o['from'] = relationships.value[i]['start_node_element_id']
-    o['to'] = relationships.value[i]['end_node_element_id']
+    o['from'] = relationships[i]['start_node_element_id']
+    o['to'] = relationships[i]['end_node_element_id']
+    o['lineShape'] = 3
     lines.push(o)
   }
   jsonData['nodes'] = processNode
   jsonData['lines'] = lines
 
   await nextTick()
-  graphRef$.value.setJsonData(jsonData)
+  ref.setJsonData(jsonData)
+
+  isAllowDrawGraph.value = false
 }
 
-// const jsonData = {
-//   rootId: 'a',
-//   nodes: [
-//     { id: 'a', text: 'a', },
-//     { id: 'b', text: 'b', },
-//     { id: 'c', text: 'c', },
-//     { id: 'd', text: 'd', },
-//     { id: 'e', text: 'e', },
-//     { id: 'f', text: 'f', },
-//   ],
-//   lines: [
-//     { from: 'a', to: 'b', },
-//     { from: 'a', to: 'c', },
-//     { from: 'a', to: 'd', },
-//     { from: 'a', to: 'e', },
-//     { from: 'a', to: 'f', },
-//   ],
-// }
-
-const nowShowDetailNodeID = ref<string>('')
+const nowShowDetailNodeID = ref<string>('')   // 右键显示节点详细信息
 
 const showNodeDetail = (id) => {
   nowShowDetailNodeID.value = id
-}
-
-const setGraphRef = (el: RelationGraph) => {    // v-for + ref 的使用
-  if(el){
-    graphRef$.value = el
-  }
 }
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 </script>
 
 <style scoped lang="scss">
+
 #chatBox{
   /* 适用于 Firefox */
   scrollbar-width: none;
@@ -644,25 +676,5 @@ const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
     font-size: 18px;
     user-select: all;
   }
-  //&:hover {
-  //  .my-node-detail {
-  //    display: block;
-  //    position: absolute;
-  //    left: 50%;
-  //    transform: translateX(-50%);
-  //    top: -50%;
-  //    width: 250px;
-  //    height: auto;
-  //    min-height: 60px;
-  //    line-height: 30px;
-  //    background: #fff;
-  //    padding: 10px 0;
-  //    border: 3px solid #f90;
-  //    color: #000;
-  //    z-index: 1;
-  //    font-size: 18px;
-  //    user-select: all;
-  //  }
-  //}
 }
 </style>

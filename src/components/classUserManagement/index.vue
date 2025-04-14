@@ -257,6 +257,7 @@ const oneClickInput = () => {
       onSuccess(res){
         if(res['code']===200){
           ElMessage({message: '录入成功', type: 'success',})
+          getCourseClassesList()
           getStudentInfo()
         }else{
           ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})
@@ -303,6 +304,7 @@ const addStudentInfo = () => {
           major: '',
           course_id: -1,
         }
+        getCourseClassesList()
         getStudentInfo()
       }else{
         ElNotification({title: 'Warning', message: res['msg'], type: 'warning',})

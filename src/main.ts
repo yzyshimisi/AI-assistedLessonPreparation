@@ -24,6 +24,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
 
+// @ts-ignore
 app.use(showdown)
 
 app.mount('#app')

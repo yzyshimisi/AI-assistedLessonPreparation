@@ -1,5 +1,5 @@
 <template>
-<div class="w-screen max-h-[1200px] min-h-screen flex gap-8">
+<div class="w-screen min-h-screen flex gap-8">
   <myMenu></myMenu>
   <div class="flex flex-col gap-1 w-[100px] mt-4">
     <button

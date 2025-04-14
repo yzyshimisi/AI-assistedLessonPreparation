@@ -73,6 +73,14 @@ import lessonProposalDesignAPI from "./Server/lessonProposalDesign/lessonProposa
 import generatePPTOutlineAPI from "./Server/generatePPT/generatePPTOutlineAPI";
 import generatePPTAPI from "./Server/generatePPT/generatePPTAPI";
 import getExerciseResourcesListAPI from "./Server/sourceMaterial/exerciseResources/getExerciseResourcesListAPI";
+import generateKnowledgeGraphAPI from "./Server/knowledgeGraph/generateKnowledgeGraphAPI";
+import getStuFinalGradesAPI from "./Server/classAcademic/examTranscript/getStuFinalGradesAPI";
+import getStuFinalTranscriptAPI from "./Server/classAcademic/examTranscript/getStuFinalTranscriptAPI";
+import sendTranscriptAPI from "./Server/classAcademic/examTranscript/sendTranscriptAPI";
+import generateExercisesAPI from "./Server/classAcademic/examScoreAnalyse/generateExercisesAPI";
+import getStuKnowledgeGraphAPI from "./Server/knowledgeGraph/getStuKnowledgeGraphAPI";
+import getWrongQuestionAPI from "./Server/classAcademic/examScoreAnalyse/getWrongQuestionAPI";
+import sendWrongQuestionAPI from "./Server/classAcademic/examScoreAnalyse/sendWrongQuestionAPI";
 
 export {
     loginAPI,
@@ -150,4 +158,12 @@ export {
     generatePPTOutlineAPI,
     generatePPTAPI,
     getExerciseResourcesListAPI,
+    generateKnowledgeGraphAPI,
+    getStuFinalGradesAPI,
+    getStuFinalTranscriptAPI,
+    sendTranscriptAPI,
+    generateExercisesAPI,
+    getStuKnowledgeGraphAPI,
+    getWrongQuestionAPI,
+    sendWrongQuestionAPI,
 }

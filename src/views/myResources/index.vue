@@ -964,7 +964,7 @@ const downloadFile = () => {    // 下载文件
 }
 
 const showShareLink = (linkUrl,code) => {
-  let link = 'http://47.96.78.173:8888/api/disk/share/'.concat(linkUrl)
+  let link = 'https://disk.qianqianzyk.top/'.concat(linkUrl)
   let msg = `链接：${link}\n提取码：${code}`
   ElMessageBox.alert(msg, '分享成功', {
     confirmButtonText: 'OK',

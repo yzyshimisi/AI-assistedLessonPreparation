@@ -101,7 +101,7 @@ const formDefault = {
   teachingObject: '计算机科学与技术2303，2304班学生',
   lectureScene: '同行评审与交流',
   writingFramework: '一、开头导入\n二、教材分析\n三、学情分析\n四、教学目标\n五、教学重难点\n六、教法学法\n七、说教学过程',
-  description: '请按照要求为我生成一份说脱稿设计案例',
+  description: '请按照要求为我生成一份说课稿设计案例',
 }
 
 const formInfo = ref({
